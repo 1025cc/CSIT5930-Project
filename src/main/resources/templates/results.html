@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+<h1>Search Results</h1>
+<table>
+    <tr th:each="result : ${results}">
+        <td th:text="${result.title}"></td>
+        <td th:text="${result.url}"></td>
+        <td th:text="${result.lastModifiedDate}"></td>
+        <td th:text="${result.size}"></td>
+    </tr>
+</table>
+<a href="/">Back to search</a>
+</body>
+</html>
