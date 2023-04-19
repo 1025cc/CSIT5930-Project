@@ -71,6 +71,15 @@ public class Indexer {
             postingList.add(posting);
             rocksDBUtil.put("word_id_to_posting",wordId,postingList);
         }
+        //store N->number of all pages
+        byte[] N = SerializationUtil.serialize("N");
+        byte[] NValue = rocksDBUtil.get(N);
+        if(NValue == null){
+            rocksDBUtil.put(N,SerializationUtil.serialize(1));
+        }else {
+            int tmp = (int)SerializationUtil.deserialize(NValue);
+            rocksDBUtil.put(N,SerializationUtil.serialize(tmp+1));
+        }
     }
 
     private HashMap<String, Integer> getKeywordFreqMap(HashMap<String, List<Integer>> wordPositions) {
@@ -85,7 +94,7 @@ public class Indexer {
         Integer wordId = (Integer) rocksDBUtil.get("word_to_word_id",word);
         if(wordId == null){
             int newWordId = wordIdCounter.getAndIncrement();
-            rocksDBUtil.put("word_to_word_id",word,wordId);
+            rocksDBUtil.put("word_to_word_id",word,newWordId);
             return newWordId;
         }else{
             return wordId;
@@ -144,20 +153,37 @@ public class Indexer {
         return total;
     }
 
-
+    /**
+     *
+     * @param pageId
+     * @return PageInfo
+     */
     public PageInfo getPageInfoById(int pageId) {
         byte[] tmp = rocksDBUtil.get("page_id_to_page_info", SerializationUtil.serialize(pageId));
         PageInfo pageInfo = (PageInfo) SerializationUtil.deserialize(tmp);
         return pageInfo;
     }
 
+    /**
+     * given a page id , return all urls of its children pages
+     * @param pageId
+     * @return
+     */
     public List<String> getChildLinksByPageId(int pageId) {
         byte[] tmp = rocksDBUtil.get("page_id_to_child_pages",SerializationUtil.serialize(pageId));
+        if(tmp == null){
+            return new ArrayList<>();
+        }
         List<Integer> pageIds = (List<Integer>) SerializationUtil.deserialize(tmp);
         List<String> pageUrls = getUrlsByIds(pageIds);
         return pageUrls;
     }
 
+    /**
+     *
+     * @param pageIds
+     * @return corresponding urls
+     */
     private List<String> getUrlsByIds(List<Integer> pageIds) {
         List<String> urls = new ArrayList<>();
         for(int pageId:pageIds){
@@ -166,17 +192,32 @@ public class Indexer {
         }
         return urls;
     }
-
+    /**
+     * given a page id , return all urls of its parent pages
+     * @param pageId
+     * @return
+     */
     public List<String> getParentLinksByPageId(int pageId) {
         byte[] tmp = rocksDBUtil.get("page_id_to_parent_pages",SerializationUtil.serialize(pageId));
+        if(tmp == null){
+            return new ArrayList<>();
+        }
         List<Integer> pageIds = (List<Integer>) SerializationUtil.deserialize(tmp);
         List<String> pageUrls = getUrlsByIds(pageIds);
         return pageUrls;
     }
 
+    /**
+     *
+     * @param pageId
+     * @return up to five most frequent stemmed keywords
+     */
     public LinkedHashMap<String, Integer> getTop5KeywordByPageId(int pageId) {
         int topK = 5;
         byte[] tmp = rocksDBUtil.get("page_id_to_keywords",SerializationUtil.serialize(pageId));
+        if(tmp == null){
+            return new LinkedHashMap<>();
+        }
         HashMap<String,Integer> keywordFreq = (HashMap<String,Integer> ) SerializationUtil.deserialize(tmp);
         PriorityQueue<Map.Entry<String, Integer>> minHeap = new PriorityQueue<>(
                 (entry1, entry2) -> Integer.compare(entry1.getValue(), entry2.getValue())
@@ -197,6 +238,10 @@ public class Indexer {
 
         return topFrequentKeywords;
     }
+
+    /**
+     * !!remember to close the db!!
+     */
     public void close() {
         if (rocksDBUtil != null) {
             rocksDBUtil.close();

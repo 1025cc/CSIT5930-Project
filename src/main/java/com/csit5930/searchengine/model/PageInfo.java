@@ -12,6 +12,9 @@ public class PageInfo implements Serializable {
     private String lastModifiedDate;
     private int pageSize;
     private int tfMax;
+    public PageInfo() {
+        // empty constructor required for serialization
+    }
     PageInfo(String title,String url,String lastModifiedDate,int pageSize){
         this.title = title;
         this.url = url;
@@ -56,5 +59,16 @@ public class PageInfo implements Serializable {
 
     public void setTfMax(int tfMax) {
         this.tfMax = tfMax;
+    }
+
+    @Override
+    public String toString() {
+        return "PageInfo{" +
+                "title='" + title + '\'' +
+                ", url='" + url + '\'' +
+                ", lastModifiedDate='" + lastModifiedDate + '\'' +
+                ", pageSize=" + pageSize +
+                ", tfMax=" + tfMax +
+                '}';
     }
 }

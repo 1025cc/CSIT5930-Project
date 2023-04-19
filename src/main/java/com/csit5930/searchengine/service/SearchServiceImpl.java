@@ -164,6 +164,7 @@ public class SearchServiceImpl implements SearchService {
         // Retrieve posting lists for each word in the phrase
         List<Set<Integer>> pageIdsList = new ArrayList<>();
         for (String word : words) {
+            word = Tokenizer.tokenizeSingle(word);
             List<Posting> postingList = indexer.getContentPostingListByWord(word);
             if (postingList != null) {
                 //Get all page ids for calculating intersection

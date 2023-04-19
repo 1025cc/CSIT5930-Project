@@ -22,7 +22,9 @@ public class Posting implements Serializable {
      * used for handling phrase search
      */
     private List<Integer> wordPosition;
-
+    public Posting() {
+        // empty constructor required for serialization
+    }
     public Posting(int pageID, int termFreq,List<Integer> wordPosition)
     {
         this.pageID = pageID;
@@ -58,5 +60,13 @@ public class Posting implements Serializable {
 
     public void setWordPosition(List<Integer> wordPosition){
         this.wordPosition = wordPosition;
+    }
+    @Override
+    public String toString() {
+        return "Posting{" +
+                "pageID=" + pageID +
+                ", termFreq=" + termFreq +
+                ", wordPosition=" + wordPosition +
+                '}';
     }
 }

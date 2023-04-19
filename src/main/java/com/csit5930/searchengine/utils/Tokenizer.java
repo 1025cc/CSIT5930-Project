@@ -40,4 +40,13 @@ public class Tokenizer {
 
         return queryTokens;
     }
+    public static String tokenizeSingle(String queryString){
+        String token = null;
+        // Remove stop words
+        if (!stopStem.isStopWord(token)) {
+            // Perform stemming
+            token = stopStem.stem(token);
+        }
+        return token;
+    }
 }

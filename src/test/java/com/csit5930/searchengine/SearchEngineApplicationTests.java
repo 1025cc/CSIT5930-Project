@@ -1,11 +1,13 @@
 package com.csit5930.searchengine;
 
 import com.csit5930.searchengine.indexer.Indexer;
+import com.csit5930.searchengine.model.SearchResult;
 import com.csit5930.searchengine.service.SearchService;
 import com.csit5930.searchengine.model.Posting;
 import com.csit5930.searchengine.model.WebPage;
 import com.csit5930.searchengine.utils.RocksDBUtil;
 import com.csit5930.searchengine.utils.SerializationUtil;
+import com.csit5930.searchengine.utils.Tokenizer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,7 +66,18 @@ class SearchEngineApplicationTests {
         indexer.indexPage(webPage3);
         indexer.indexPage(webPage4);
         indexer.indexPage(webPage5);
-        searchService.search("history");
+        int n = indexer.getTotalDocumentNum();
+        //searchService.search("history");
         indexer.close();
     }
+    @Test
+    void testTTT(){
+        List<SearchResult> results = searchService.search("history");
+        List<String> te = Tokenizer.tokenize("history \"the history\"");
+        List<Posting> postingList = indexer.getContentPostingListByWord(null);
+        if(postingList == null){
+            System.out.println("dd");
+        }
+    }
+
 }

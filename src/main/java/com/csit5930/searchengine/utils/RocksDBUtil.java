@@ -61,9 +61,20 @@ public class RocksDBUtil {
     public void put(String columnFamily, Object key, Object value) {
         put(columnFamily,SerializationUtil.serialize(key),SerializationUtil.serialize(value));
     }
-
+    public byte[] put(byte[] key, byte[] value) {
+        try {
+            db.put(key, value);
+            return key;
+        } catch (RocksDBException e) {
+            logger.error("Error putting key-value pair to RocksDB database", e);
+            return null;
+        }
+    }
 
     public byte[] get(String columnFamily, byte[] key) {
+        if(key == null){
+            return null;
+        }
         try {
             ColumnFamilyHandle cfHandle = columnFamilyHandleMap.get(columnFamily);
             if (cfHandle != null) {
@@ -79,6 +90,9 @@ public class RocksDBUtil {
     }
 
     public byte[] get(byte[] key){
+        if(key == null){
+            return null;
+        }
         byte[] value;
         try {
             value = db.get(key);
@@ -95,15 +109,21 @@ public class RocksDBUtil {
         }
         db.close();
     }
+    public void displayAllIndexes() {
+        for (String columnFamily : columnFamilyHandleMap.keySet()) {
+            System.out.println("Column Family: " + columnFamily);
+            ColumnFamilyHandle columnFamilyHandle = columnFamilyHandleMap.get(columnFamily);
 
-    public static long countKeysInColumnFamily(RocksDB db, ColumnFamilyHandle columnFamilyHandle) {
-        long count = 0;
-        try (RocksIterator iterator = db.newIterator(columnFamilyHandle)) {
-            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
-                count++;
+            try (RocksIterator iterator = db.newIterator(columnFamilyHandle)) {
+                for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+                    Object key = SerializationUtil.deserialize(iterator.key());
+                    Object value = SerializationUtil.deserialize(iterator.value());
+                    System.out.println("Key: " + key + ", Value: " + value);
+                }
+            } catch (Exception e) {
+                logger.error("Error during displaying all indexes: {}", e.getMessage(), e);
             }
         }
-        return count;
     }
 }
 
