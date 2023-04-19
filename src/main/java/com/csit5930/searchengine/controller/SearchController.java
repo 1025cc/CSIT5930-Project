@@ -23,7 +23,7 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam("query") String query, Model model) throws RocksDBException {
+    public String search(@RequestParam("query") String query, Model model) {
         List<SearchResult> searchResults = searchService.search(query);
         model.addAttribute("searchResults", searchResults);
         return "results";

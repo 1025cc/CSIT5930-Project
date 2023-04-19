@@ -23,11 +23,11 @@ public class Posting implements Serializable {
      */
     private List<Integer> wordPosition;
 
-    public Posting(int pageID, int termFreq)
+    public Posting(int pageID, int termFreq,List<Integer> wordPosition)
     {
         this.pageID = pageID;
         this.termFreq = termFreq;
-        this.wordPosition = new ArrayList<>();
+        this.wordPosition = wordPosition;
     }
 
 
@@ -54,5 +54,9 @@ public class Posting implements Serializable {
 
     public List<Integer> getWordPosition(){
         return  wordPosition;
+    }
+
+    public void setWordPosition(List<Integer> wordPosition){
+        this.wordPosition = wordPosition;
     }
 }

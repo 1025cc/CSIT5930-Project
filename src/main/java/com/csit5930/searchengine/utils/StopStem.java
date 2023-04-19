@@ -1,6 +1,7 @@
 package com.csit5930.searchengine.utils;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
@@ -18,15 +19,17 @@ public class StopStem
 		super();
 		porter = new Porter();
 		stopWords = new HashSet<String>();
-				
-		// use BufferedReader to extract the stopwords in stopwords.txt (path passed as parameter str)
-		// add them to HashSet<String> stopWords
-		// todo MODIFY THE BELOW CODE AND ADD YOUR CODES HERE
-		stopWords.add("is");
-		stopWords.add("am");
-		stopWords.add("are");
-		stopWords.add("was");
-		stopWords.add("were");
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(str));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				stopWords.add(line);
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	public String stem(String str)
 	{
