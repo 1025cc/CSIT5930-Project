@@ -125,6 +125,18 @@ public class RocksDBUtil {
             }
         }
     }
+    public List<Object> getAllValues(String columnFamily){
+        List<Object> res = new ArrayList<>();
+        ColumnFamilyHandle columnFamilyHandle = columnFamilyHandleMap.get(columnFamily);
+        try (RocksIterator iterator = db.newIterator(columnFamilyHandle)) {
+            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+                // Deserialize the value to get the pageId
+                Object obj = SerializationUtil.deserialize(iterator.value());
+                res.add(obj);
+            }
+        }
+        return res;
+    }
     public void delete(String columnFamily,byte[] key) {
         try {
             ColumnFamilyHandle cfHandle = columnFamilyHandleMap.get(columnFamily);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Component
 public class Indexer {
@@ -33,6 +34,7 @@ public class Indexer {
     public static final String PAGE_ID_TO_PAGE_INFO = "page_id_to_page_info";
     public static final String PAGE_ID_TO_CHILD_PAGES = "page_id_to_child_pages";
     public static final String PAGE_ID_TO_PARENT_PAGES = "page_id_to_parent_pages";
+    public static final String PAGE_ID_TO_PAGE_RANK = "page_id_to_page_rank";
     //forward index, storing the keywords and frequencies for each page
     public static final String PAGE_ID_TO_KEYWORDS = "page_id_to_keywords";
     public Indexer(){
@@ -45,6 +47,7 @@ public class Indexer {
         columnFamilies.add(PAGE_ID_TO_CHILD_PAGES) ;
         columnFamilies.add(PAGE_ID_TO_PARENT_PAGES) ;
         columnFamilies.add(PAGE_ID_TO_KEYWORDS);
+        columnFamilies.add(PAGE_ID_TO_PAGE_RANK);
         rocksDBUtil = new RocksDBUtil(dbPath, columnFamilies);
     }
 
@@ -121,7 +124,7 @@ public class Indexer {
         String title = getPageInfoById(pageId).getTitle();
         List<String> titleTokens = Tokenizer.tokenize(title);
         for(String word:titleTokens){
-            int wordId = getWordIdByWord(word);
+            int wordId =  getWordIdByWord(word);
             // Remove the old posting for this page
             List<Posting> postingList = (List<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING_TITLE, wordId);
             postingList.removeIf(p -> p.getPageID() == pageId);
@@ -399,7 +402,7 @@ public class Indexer {
      * @param pageId
      * @return set guarantees no duplication ids
      */
-    private Set<Integer> getParentIdsByPageId(int pageId) {
+    public Set<Integer> getParentIdsByPageId(int pageId) {
         byte[] tmp = rocksDBUtil.get(PAGE_ID_TO_PARENT_PAGES,SerializationUtil.serialize(pageId));
         if(tmp == null){
             return new HashSet<>();
@@ -440,7 +443,7 @@ public class Indexer {
      * @param pageId
      * @return set guarantees no duplication ids
      */
-    private Set<Integer> getChildIdsByPageId(int pageId) {
+    public Set<Integer> getChildIdsByPageId(int pageId) {
         byte[] tmp = rocksDBUtil.get(PAGE_ID_TO_CHILD_PAGES,SerializationUtil.serialize(pageId));
         if(tmp == null){
             return new HashSet<>();
@@ -451,5 +454,21 @@ public class Indexer {
 
     public void displayAllIndex(){
         rocksDBUtil.displayAllIndexes();
+    }
+
+    public List<Integer> getAllPageIds(){
+        List<Object> objectList = rocksDBUtil.getAllValues(URL_TO_PAGE_ID);
+        //convert
+        List<Integer> pageIds = objectList.stream()
+                .map(obj -> (Integer) obj)
+                .collect(Collectors.toList());
+        return pageIds;
+    }
+
+    public void putPageRankValue(int pageId, double pageRankValue){
+        rocksDBUtil.put(PAGE_ID_TO_PAGE_RANK,pageId,pageRankValue);
+    }
+    public double getPageRankValue(int pageId){
+        return (double) rocksDBUtil.get(PAGE_ID_TO_PAGE_RANK,pageId);
     }
 }

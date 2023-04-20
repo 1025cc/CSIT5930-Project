@@ -16,15 +16,13 @@ public class SearchServiceImpl implements SearchService {
     /**
      * favor the title matches
      */
-    private final int TITLE_BOOST_FACTOR = 3;
+    private final int TITLE_BOOST_FACTOR = 5;
     /**
      * the maximum num of the search results
      */
     private final int MAX_OUTPUT_NUM = 50;
     @Autowired
     private Indexer indexer;
-    @Autowired
-    private PageRank pageRank;
 
 
     @Override
@@ -67,9 +65,11 @@ public class SearchServiceImpl implements SearchService {
         for (Map.Entry<Integer, Map<String, Double>> entry : documentVectors.entrySet()) {
             int pageId = entry.getKey();
             Map<String, Double> documentVector = entry.getValue();
-
+            //combine the pagerank values with cosine similarity
             double cosineSimilarity = calculateCosineSimilarity(queryTokens, documentVector);
-            HashMap.SimpleEntry<Integer,Double> scoreEntry = new HashMap.SimpleEntry<>(pageId,cosineSimilarity);
+            double pageRankValue = indexer.getPageRankValue(pageId);
+            double score = 0.4 * pageRankValue + 0.6 * cosineSimilarity;
+            HashMap.SimpleEntry<Integer,Double> scoreEntry = new HashMap.SimpleEntry<>(pageId,score);
             if (ranking.size() < MAX_OUTPUT_NUM) {
                 ranking.add(scoreEntry);
             } else if (cosineSimilarity > ranking.peek().getValue()) {
@@ -148,10 +148,10 @@ public class SearchServiceImpl implements SearchService {
         HashSet<Integer> contentIntersection = new HashSet<>();
         HashSet<Integer> titleIntersection = new HashSet<>();
         // Retrieve posting lists for each word in the phrase
-        for (String word : words) {
-            word = Tokenizer.tokenizeSingle(word);
-            List<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
-            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
+        for (int i = 0;i<words.length;i++) {
+            words[i] = Tokenizer.tokenizeSingle(words[i]);
+            List<Posting> contentPostingList = indexer.getContentPostingListByWord(words[i]);
+            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
             intersect(contentIntersection, contentPostingList);
             intersect(titleIntersection, titlePostingList);
         }
