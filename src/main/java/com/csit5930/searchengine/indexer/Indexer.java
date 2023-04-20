@@ -353,7 +353,9 @@ public class Indexer {
         Set<String> urls = new HashSet<>();
         for(int pageId:pageIds){
             PageInfo pageInfo = getPageInfoById(pageId);
-            urls.add(pageInfo.getUrl());
+            if(pageInfo != null){
+                urls.add(pageInfo.getUrl());
+            }
         }
         return urls;
     }

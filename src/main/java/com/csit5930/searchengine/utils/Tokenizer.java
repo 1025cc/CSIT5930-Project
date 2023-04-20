@@ -29,14 +29,15 @@ public class Tokenizer {
             if (token.startsWith("\"") && token.endsWith("\"")) {
                 // Remove double quotes from phrases
                 token = token.substring(1, token.length() - 1);
+                queryTokens.add(token);
             }else{
                 // Remove stop words
                 if (!stopStem.isStopWord(token)) {
                     // Perform stemming
                     token = stopStem.stem(token);
+                    queryTokens.add(token);
                 }
             }
-            queryTokens.add(token);
         }
 
         return queryTokens;
