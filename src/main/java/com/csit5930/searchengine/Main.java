@@ -27,6 +27,7 @@ public class Main {
 
     }
 
+    //todo crawl
     public static void main(String[] args) {
         Indexer indexer = new Indexer();
         List<Integer> pageIds = indexer.getAllPageIds();
