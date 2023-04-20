@@ -44,7 +44,7 @@ public class RocksDBUtil {
             }
 
         } catch (RocksDBException e) {
-            e.printStackTrace();
+            logger.error("Error while openning RocksDBUtil");
         }
     }
 
@@ -55,7 +55,7 @@ public class RocksDBUtil {
                 db.put(cfHandle, key, value);
             }
         } catch (RocksDBException e) {
-            e.printStackTrace();
+            logger.error("Error while putting key into column family {}: {}", columnFamily,e.getMessage());
         }
     }
     public void put(String columnFamily, Object key, Object value) {
@@ -81,7 +81,7 @@ public class RocksDBUtil {
                 return db.get(cfHandle, key);
             }
         } catch (RocksDBException e) {
-            e.printStackTrace();
+            logger.error("Error while getting key from column family {}: {}", columnFamily,e.getMessage());
         }
         return null;
     }
@@ -98,7 +98,7 @@ public class RocksDBUtil {
             value = db.get(key);
             return value;
         } catch (RocksDBException e) {
-            logger.error("Error while getting key from default column family: {}", e.getMessage(), e);
+            logger.error("Error while getting key from default column family: {}", e.getMessage());
         }
         return null;
     }
@@ -121,9 +121,24 @@ public class RocksDBUtil {
                     System.out.println("Key: " + key + ", Value: " + value);
                 }
             } catch (Exception e) {
-                logger.error("Error during displaying all indexes: {}", e.getMessage(), e);
+                logger.error("Error during displaying all indexes: {}", e.getMessage());
             }
         }
+    }
+    public void delete(String columnFamily,byte[] key) {
+        try {
+            ColumnFamilyHandle cfHandle = columnFamilyHandleMap.get(columnFamily);
+            if (cfHandle != null) {
+                db.delete(cfHandle, key);
+            }
+        } catch (RocksDBException e) {
+            logger.error("Error deleting key from RocksDB: {}", e.getMessage());
+        }
+    }
+
+    public void delete(String columnFamily, Object key) {
+        byte[] tmp = SerializationUtil.serialize(key);
+        delete(columnFamily,tmp);
     }
 }
 

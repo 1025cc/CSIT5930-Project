@@ -16,13 +16,15 @@ public class SearchServiceImpl implements SearchService {
     /**
      * favor the title matches
      */
-    private final double TITLE_BOOST_FACTOR = 3.0;
+    private final int TITLE_BOOST_FACTOR = 3;
     /**
      * the maximum num of the search results
      */
     private final int MAX_OUTPUT_NUM = 50;
     @Autowired
     private Indexer indexer;
+    @Autowired
+    private PageRank pageRank;
 
 
     @Override
@@ -129,29 +131,10 @@ public class SearchServiceImpl implements SearchService {
             double tfMax = indexer.getTfMax(pageId);
             double tf = entry.getValue();
             double df = pageIdToTf.size();
-            double N = indexer.getTotalDocumentNum();
+            double N = indexer.getTotalPageNum();
             double tfIdf = (tf/tfMax) * log2(N/df);
-            //boosting title matching
-            if(isTokenInTitle(token,pageId)){
-                tfIdf *= TITLE_BOOST_FACTOR;
-            }
             documentVectors.computeIfAbsent(pageId, k -> new HashMap<>()).put(token,tfIdf);
         }
-    }
-    public boolean isTokenInTitle(String token, int pageId) {
-        List<Posting> postings = indexer.getContentPostingListByWord(token);
-        boolean res = false;
-        for(Posting posting:postings){
-            if(posting.getPageID() == pageId){
-                PageInfo pageInfo = indexer.getPageInfoById(pageId);
-                String title = pageInfo.getTitle();
-                if(title.toLowerCase().contains(token.toLowerCase())){
-                    res = true;
-                    return res;
-                }
-            }
-        }
-        return res;
     }
     public double log2(double x) {
         return  (Math.log(x) / Math.log(2.0));
@@ -161,81 +144,96 @@ public class SearchServiceImpl implements SearchService {
         // Tokenize the phrase
         String[] words = phrase.split(" ");
 
+        //Page ids of all words in the phrase appear together
+        HashSet<Integer> contentIntersection = new HashSet<>();
+        HashSet<Integer> titleIntersection = new HashSet<>();
         // Retrieve posting lists for each word in the phrase
-        List<Set<Integer>> pageIdsList = new ArrayList<>();
         for (String word : words) {
             word = Tokenizer.tokenizeSingle(word);
-            List<Posting> postingList = indexer.getContentPostingListByWord(word);
-            if (postingList != null) {
-                //Get all page ids for calculating intersection
-                Set<Integer> pageIds = new HashSet<>();
-                for(Posting posting:postingList){
-                    pageIds.add(posting.getPageID());
-                }
-                pageIdsList.add(pageIds);
-            }
+            List<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
+            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
+            intersect(contentIntersection, contentPostingList);
+            intersect(titleIntersection, titlePostingList);
         }
 
-        // Intersect posting lists to find documents containing all words in the phrase
-        HashSet<Integer> commonPageIds = getIntersection(pageIdsList);
-
-        // Check if the word positions form a valid phrase in each document
+        // Check if the word positions form a valid phrase in each page content
         HashMap<Integer, Integer> result = new HashMap<>();
-        for (Integer pageId : commonPageIds) {
-            int validCount = 0;
-            for (int i = 1; i < words.length; i++) {
-                List<Integer> prevWordPositions = indexer.getWordPositions(words[i - 1], pageId);
-                List<Integer> currWordPositions = indexer.getWordPositions(words[i], pageId);
-                validCount = Math.min(validCount,countConsecutivePositions(prevWordPositions, currWordPositions));
-            }
-            if (validCount>0) {
-                result.put(pageId,validCount);
+        for (int pageId : contentIntersection) {
+            int validCount = countPhraseOccurrences(words, pageId,0);
+            if (validCount > 0) {
+                result.put(pageId, validCount);
             }
         }
-
+        // Check if the word positions form a valid phrase in each page title
+        for (int pageId : titleIntersection) {
+            int validCount = countPhraseOccurrences(words, pageId,1);
+            if (validCount > 0) {
+                result.put(pageId, result.getOrDefault(pageId, 1) * TITLE_BOOST_FACTOR);
+            }
+        }
         return result;
     }
 
+    private void intersect(HashSet<Integer> titleIntersection, List<Posting> titlePostingList) {
+        if (titlePostingList != null) {
+            //Get all page ids for calculating intersection
+            Set<Integer> pageIds = new HashSet<>();
+            for(Posting posting:titlePostingList){
+                pageIds.add(posting.getPageID());
+            }
+            if (titleIntersection.isEmpty()) {
+                titleIntersection.addAll(pageIds);
+            } else {
+                titleIntersection.retainAll(pageIds);
+            }
+        }
+    }
 
     /**
      *
-     * @param pageIdsList Page ids of all words in the phrase that have appeared
-     * @return Page ids of all words in the phrase appear together
+     * @param words
+     * @param pageId
+     * @param flag 0-in content 1-in title
+     * @return
      */
-    private HashSet<Integer> getIntersection(List<Set<Integer>> pageIdsList) {
-        HashSet<Integer> intersection = new HashSet<>();
-        for (Set<Integer> set : pageIdsList) {
-            if (intersection.isEmpty()) {
-                intersection.addAll(set);
-            } else {
-                intersection.retainAll(set);
+    private int countPhraseOccurrences(String[] words, int pageId,int flag) {
+        int validCount = 0;
+        List<Integer> firstWordPosition = indexer.getWordPositions(words[0], pageId,flag);
+        for (int i = 0; i < firstWordPosition.size(); i++) {
+            int position = firstWordPosition.get(i);
+            boolean isPhrase = true;
+            // Check if the subsequent words in the phrase have positions incremented by 1
+            for (int j = 1; j < words.length; j++) {
+                List<Integer> curWordPosition = indexer.getWordPositions(words[j], pageId,flag);
+                if (!curWordPosition.contains(position+1)) {
+                    isPhrase = false;
+                    break;
+                }
+                position++;
+            }
+            if (isPhrase) {
+                validCount++;
             }
         }
-        return intersection;
+        return validCount;
     }
-    private int countConsecutivePositions(List<Integer> list1, List<Integer> list2) {
-        int res = 0;
-        int i = 0, j = 0;
-        while (i < list1.size() && j < list2.size()) {
-            if (list1.get(i) + 1 == list2.get(j)) {
-                res++;
-            } else if (list1.get(i) < list2.get(j)) {
-                i++;
-            } else {
-                j++;
-            }
-        }
-        return res;
-    }
+
     public HashMap<Integer,Integer> computeTermFreqWord(String word){
         HashMap<Integer,Integer> termFreq = new HashMap<>();
         //Get a list of postings according to the word
-        List<Posting> postingList = indexer.getContentPostingListByWord(word);
+        List<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
+        List<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
         //get tf_ij for word i in page j
-        for (Posting posting : postingList) {
+        for (Posting posting : contentPostingList) {
             int tf = posting.getTermFreq();
             int pageId = posting.getPageID();
             termFreq.put(pageId, tf);
+        }
+        //boosting title matching
+        for (Posting posting : titlePostingList) {
+            int pageId = posting.getPageID();
+            int tf = termFreq.getOrDefault(pageId,1) * TITLE_BOOST_FACTOR;
+            termFreq.put(pageId,tf);
         }
         return termFreq;
     }

@@ -1,7 +1,7 @@
 package com.csit5930.searchengine.model;
 
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Set;
 
 public class SearchResult {
     private String title;
@@ -9,8 +9,8 @@ public class SearchResult {
     private String lastModifiedDate;
     private int size;
     private LinkedHashMap<String, Integer> top5Keywords;
-    private List<String> parentLinks;
-    private List<String> childLinks;
+    private Set<String> parentLinks;
+    private Set<String> childLinks;
 
     public String getTitle() {
         return title;
@@ -52,22 +52,21 @@ public class SearchResult {
         this.top5Keywords = top5Keywords;
     }
 
-    public List<String> getParentLinks() {
+    public Set<String> getParentLinks() {
         return parentLinks;
     }
 
-    public void setParentLinks(List<String> parentLinks) {
+    public void setParentLinks(Set<String> parentLinks) {
         this.parentLinks = parentLinks;
     }
 
-    public List<String> getChildLinks() {
+    public Set<String> getChildLinks() {
         return childLinks;
     }
 
-    public void setChildLinks(List<String> childLinks) {
+    public void setChildLinks(Set<String> childLinks) {
         this.childLinks = childLinks;
     }
 
-    // Add getters and setters here
 }
 

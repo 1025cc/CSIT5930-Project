@@ -1,7 +1,9 @@
 package com.csit5930.searchengine;
 
 import com.csit5930.searchengine.indexer.Indexer;
+import com.csit5930.searchengine.model.PageInfo;
 import com.csit5930.searchengine.model.SearchResult;
+import com.csit5930.searchengine.service.PageRank;
 import com.csit5930.searchengine.service.SearchService;
 import com.csit5930.searchengine.model.Posting;
 import com.csit5930.searchengine.model.WebPage;
@@ -66,18 +68,33 @@ class SearchEngineApplicationTests {
         indexer.indexPage(webPage3);
         indexer.indexPage(webPage4);
         indexer.indexPage(webPage5);
-        int n = indexer.getTotalDocumentNum();
+        int n = indexer.getTotalPageNum();
         //searchService.search("history");
         indexer.close();
     }
     @Test
     void testTTT(){
-        List<SearchResult> results = searchService.search("history");
-        List<String> te = Tokenizer.tokenize("history \"the history\"");
-        List<Posting> postingList = indexer.getContentPostingListByWord(null);
-        if(postingList == null){
-            System.out.println("dd");
-        }
+        System.out.println("==============before==============");
+        indexer.displayAllIndex();
+        System.out.println("==============after==============");
+        WebPage webPage1 = new WebPage("update update update i 324nf hong kong.", "AI Introduction new", "https://example.com/ai-introduction", "2022-11-12", 300);
+        indexer.updatePage(webPage1);
+        indexer.displayAllIndex();
+        indexer.close();
     }
 
+    @Test
+    void testIndexer1(){
+        //WebPage webPage1 = new WebPage("update update update i 324nf \"hong kong\".", "AI Introduction new", "https://example.com/ai-introduction", "2022-11-12", 300);
+        //indexer.indexPage(webPage1);
+        //indexer.displayAllIndex();
+        PageInfo pageInfo= indexer.getPageInfoById(111);
+        indexer.close();
+    }
+
+    @Test
+    void testResult(){
+        List<SearchResult> results = searchService.search("AI");
+        System.out.println(results);
+    }
 }
