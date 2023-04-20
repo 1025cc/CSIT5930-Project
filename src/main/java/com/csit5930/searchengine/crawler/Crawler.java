@@ -134,7 +134,7 @@ class Crawler
         {
             Crawler crawler = new Crawler();
 
-            int PageMax = 300;
+            int PageMax = 30;
             int pageID = 0;
             Map dict = new HashMap();
 
@@ -221,9 +221,6 @@ class Crawler
 
                 for(int i = 0; i < links.size(); i++) {
                     try{
-                        URL url_fetch = new URL(links.get(i));
-                        InputStream in = url_fetch.openStream();
-
                         // check whether the url is valid
 
                         writer.println(links.get(i));
@@ -248,7 +245,7 @@ class Crawler
                             }
 
                         }
-                    }
+
                     catch(Exception e){}
 
                 }
