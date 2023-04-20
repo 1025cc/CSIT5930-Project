@@ -222,30 +222,27 @@ class Crawler
                 for(int i = 0; i < links.size(); i++) {
                     try{
                         URL url_fetch = new URL(links.get(i));
-                        HttpURLConnection connection = (HttpURLConnection) url_fetch.openConnection();
-                        connection.setRequestMethod("GET");
-                        connection.setConnectTimeout(2000);
-                        connection.setReadTimeout(2000);
+                        InputStream in = url_fetch.openStream();
 
                         // check whether the url is valid
-                        if (connection.getResponseCode() == 200){
-                            writer.println(links.get(i));
-                            System.out.println(links.get(i));
 
-                            if(links.get(i)==null) {
-                                continue;
-                            }
-                            else{
-                                HashSet child_url = new HashSet();
-                                String child = links.get(i);
-                                child_url.add(child);
-                                if(!queue.contains(child)) {
-                                    pageID++;
-                                    dict.put(child, pageID);
-                                    queue.offer(child);
-                                    // add parent and child urls
-                                    indexer.addChildLinks(url, child_url);
-                                    indexer.addParentLinks(child,parent_url);
+                        writer.println(links.get(i));
+                        System.out.println(links.get(i));
+
+                        if(links.get(i)==null) {
+                            continue;
+                        }
+                        else{
+                            HashSet child_url = new HashSet();
+                            String child = links.get(i);
+                            child_url.add(child);
+                            if(!queue.contains(child)) {
+                                pageID++;
+                                dict.put(child, pageID);
+                                queue.offer(child);
+                                // add parent and child urls
+                                indexer.addChildLinks(url, child_url);
+                                indexer.addParentLinks(child,parent_url);
 
                                 }
                             }
