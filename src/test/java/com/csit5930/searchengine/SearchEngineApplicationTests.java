@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +58,7 @@ class SearchEngineApplicationTests {
     @Test
     void testIndexer(){
         WebPage webPage1 = new WebPage("This is an example page about artificial intelligence.", "AI Introduction", "https://example.com/ai-introduction", "2022-11-12", 300);
-        WebPage webPage2 = new WebPage("Learn about the history of programming languages.", "Programming Languages History", "https://example.com/programming-history", "2022-11-11", 350);
+        WebPage webPage2 = new WebPage("Learn about the history of programming languages data science.", "Programming Languages History", "https://example.com/programming-history", "2022-11-11", 350);
         WebPage webPage3 = new WebPage("Explore the world of software engineering practices and principles.", "Software Engineering Basics", "https://example.com/software-engineering", "2022-11-10", 400);
         WebPage webPage4 = new WebPage("Discover the importance of cybersecurity in today's digital world.", "Cybersecurity Essentials", "https://example.com/cybersecurity", "2022-11-09", 450);
         WebPage webPage5 = new WebPage("Dive into the fascinating world of data science and its applications.", "Data Science Overview", "https://example.com/data-science", "2022-11-08", 500);
@@ -74,11 +73,12 @@ class SearchEngineApplicationTests {
     }
     @Test
     void testTTT(){
+        /**
         System.out.println("==============before==============");
         indexer.displayAllIndex();
         System.out.println("==============after==============");
         WebPage webPage1 = new WebPage("update update update i 324nf hong kong.", "AI Introduction new", "https://example.com/ai-introduction", "2022-11-12", 300);
-        indexer.updatePage(webPage1);
+        indexer.updatePage(webPage1);**/
         indexer.displayAllIndex();
         indexer.close();
     }
@@ -94,7 +94,7 @@ class SearchEngineApplicationTests {
 
     @Test
     void testResult(){
-        List<SearchResult> results = searchService.search("AI");
+        List<SearchResult> results = searchService.search("\"data science\" world");
         System.out.println(results);
     }
 }

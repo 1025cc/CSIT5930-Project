@@ -121,7 +121,7 @@ public class Indexer {
         String title = getPageInfoById(pageId).getTitle();
         List<String> titleTokens = Tokenizer.tokenize(title);
         for(String word:titleTokens){
-            int wordId = getWordIdByWord(word);
+            int wordId =  getWordIdByWord(word);
             // Remove the old posting for this page
             List<Posting> postingList = (List<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING_TITLE, wordId);
             postingList.removeIf(p -> p.getPageID() == pageId);

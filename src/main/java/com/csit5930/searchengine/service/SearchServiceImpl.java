@@ -16,7 +16,7 @@ public class SearchServiceImpl implements SearchService {
     /**
      * favor the title matches
      */
-    private final int TITLE_BOOST_FACTOR = 3;
+    private final int TITLE_BOOST_FACTOR = 5;
     /**
      * the maximum num of the search results
      */
@@ -148,10 +148,10 @@ public class SearchServiceImpl implements SearchService {
         HashSet<Integer> contentIntersection = new HashSet<>();
         HashSet<Integer> titleIntersection = new HashSet<>();
         // Retrieve posting lists for each word in the phrase
-        for (String word : words) {
-            word = Tokenizer.tokenizeSingle(word);
-            List<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
-            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
+        for (int i = 0;i<words.length;i++) {
+            words[i] = Tokenizer.tokenizeSingle(words[i]);
+            List<Posting> contentPostingList = indexer.getContentPostingListByWord(words[i]);
+            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
             intersect(contentIntersection, contentPostingList);
             intersect(titleIntersection, titlePostingList);
         }

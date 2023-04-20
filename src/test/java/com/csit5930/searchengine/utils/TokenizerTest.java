@@ -10,8 +10,8 @@ class TokenizerTest {
 
     @Test
     void tokenize() {
-        String pageBody = "update update update i 324nf hong kong.";
-        List<String> pageBodyWords = Tokenizer.tokenize(pageBody);
+        String query = "\"data science\" world";
+        List<String> tokens = Tokenizer.tokenize(query);
     }
 
     @Test

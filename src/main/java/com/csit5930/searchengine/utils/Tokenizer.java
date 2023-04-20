@@ -29,13 +29,14 @@ public class Tokenizer {
             if (token.startsWith("\"") && token.endsWith("\"")) {
                 // Remove double quotes from phrases
                 token = token.substring(1, token.length() - 1);
+            }else{
+                // Remove stop words
+                if (!stopStem.isStopWord(token)) {
+                    // Perform stemming
+                    token = stopStem.stem(token);
+                }
             }
-            // Remove stop words
-            if (!stopStem.isStopWord(token)) {
-                // Perform stemming
-                token = stopStem.stem(token);
-                queryTokens.add(token);
-            }
+            queryTokens.add(token);
         }
 
         return queryTokens;
@@ -43,9 +44,9 @@ public class Tokenizer {
     public static String tokenizeSingle(String queryString){
         String token = null;
         // Remove stop words
-        if (!stopStem.isStopWord(token)) {
+        if (!stopStem.isStopWord(queryString)) {
             // Perform stemming
-            token = stopStem.stem(token);
+            token = stopStem.stem(queryString);
         }
         return token;
     }
