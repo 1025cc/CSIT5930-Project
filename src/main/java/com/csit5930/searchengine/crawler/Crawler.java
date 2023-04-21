@@ -134,14 +134,15 @@ class Crawler
         {
             Crawler crawler = new Crawler();
 
-            int PageMax = 30;
+            int PageMax = 300;
             int pageID = 0;
             Map dict = new HashMap();
 
             ArrayList<String> visited_urls = new ArrayList<String>();
 
-            File outputFile = new File("Spider.txt");
-            PrintWriter writer = new PrintWriter(outputFile);
+            // write the result into file
+            // File outputFile = new File("Spider.txt");
+            // PrintWriter writer = new PrintWriter(outputFile);
 
             Queue<String> queue = new LinkedList<String>();
             String initial_url = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
@@ -177,10 +178,10 @@ class Crawler
 
                 Object current_pageID = dict.get(url);
 
-                writer.println("");
-                writer.println("");
-                writer.println("Current PageID: " + current_pageID);
-                writer.println("Current URL: "+url);
+                // writer.println("");
+                // writer.println("");
+                // writer.println("Current PageID: " + current_pageID);
+                // writer.println("Current URL: "+url);
 
                 System.out.println("Current PageID: " + current_pageID);
                 System.out.println("Current URL: "+url);
@@ -197,11 +198,11 @@ class Crawler
                 String title = String.join(" ", words_title);
                 String body  = String.join(" ",words);
 
-                writer.println("Title: "+words_title);
-                writer.println("Body: "+words);
-                writer.println("Page size: "+getPageSize(url));
-                writer.println("Last Modified Date: "+getLastModifiedDate(url));
-                writer.println("");
+                // writer.println("Title: "+words_title);
+                // writer.println("Body: "+words);
+                // writer.println("Page size: "+getPageSize(url));
+                // writer.println("Last Modified Date: "+getLastModifiedDate(url));
+                // writer.println("");
 
                 System.out.println("Title: "+words_title);
                 System.out.println("Body: "+words);
@@ -214,7 +215,7 @@ class Crawler
                 indexer.indexPage(webPage);
 
                 // iterate the child urls by BFS
-                writer.println("Child URLs:");
+                // writer.println("Child URLs:");
                 Vector<String> links = crawler.extractLinks();
                 HashSet parent_url = new HashSet();
                 parent_url.add(url);
@@ -223,7 +224,7 @@ class Crawler
                     try{
                         // check whether the url is valid
 
-                        writer.println(links.get(i));
+                        // writer.println(links.get(i));
                         System.out.println(links.get(i));
 
                         if(links.get(i)==null) {
@@ -264,7 +265,7 @@ class Crawler
         System.out.println("fetch started");
         Crawler.fetch();
         System.out.println("fetch finished");
-        System.out.println(indexer.getTitlePostingListByWord("of"));
+        System.out.println(indexer.getTitlePostingListByWord("the"));
         System.out.println(indexer.getParentLinksByPageId(2));
         System.out.println(indexer.getTfMax(2));
 
