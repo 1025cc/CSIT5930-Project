@@ -36,12 +36,11 @@ public class Main {
         for(int pageId:pageIds){
             Set<Integer> childPages = indexer.getChildIdsByPageId(pageId);
             Set<Integer> parentPages = indexer.getParentIdsByPageId(pageId);
-            childToParentLinks.put(pageId,childPages);
-            parentToChildLinks.put(pageId,parentPages);
+            childToParentLinks.put(pageId,parentPages);
+            parentToChildLinks.put(pageId,childPages);
         }
         PageRank pageRank = new PageRank(childToParentLinks,parentToChildLinks);
         pageRank.computePageRanks();
-        pageRank.normalizePageRanks();
         for(int pageId:pageIds){
             double pageRankValue = pageRank.getPageRank(pageId);
             indexer.putPageRankValue(pageId,pageRankValue);
