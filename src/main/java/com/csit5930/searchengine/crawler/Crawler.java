@@ -17,8 +17,7 @@ import org.htmlparser.tags.TitleTag;
 import org.htmlparser.util.NodeIterator;
 import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
-import java.io.PrintWriter;
-import java.io.File;
+
 
 
 import org.htmlparser.beans.LinkBean;
@@ -26,17 +25,20 @@ import java.net.URL;
 
 import java.sql.Date;
 import java.net.URLConnection;
-import java.net.HttpURLConnection;
 import com.csit5930.searchengine.model.WebPage;
 import com.csit5930.searchengine.indexer.Indexer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 class Crawler
 {
+    private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
+
     private static String url;
     public static Indexer indexer;
 
@@ -189,8 +191,8 @@ class Crawler
                 // writer.println("Current PageID: " + current_pageID);
                 // writer.println("Current URL: "+url);
 
-                System.out.println("Current PageID: " + current_pageID);
-                System.out.println("Current URL: "+url);
+                logger.info("Current PageID: " + current_pageID);
+                logger.info("Current URL: " + url);
 
                 //extract text from title tag
                 // Vector<String> words_title = crawler.extractTitle(url);
@@ -216,11 +218,10 @@ class Crawler
                 // writer.println("Last Modified Date: "+getLastModifiedDate(url));
                 // writer.println("");
 
-                System.out.println("Title: "+cleaned_titles);
-                System.out.println("Body: "+cleaned_texts);
-                System.out.println("Page size: "+getPageSize(url));
-                System.out.println("Last Modified Date: "+getLastModifiedDate(url));
-                System.out.println(" ");
+                logger.info("Title: " + cleaned_titles);
+                logger.info("Body: " + cleaned_texts);
+                logger.info("Page size: " + getPageSize(url));
+                logger.info("Last Modified Date: " + getLastModifiedDate(url));
 
                 // index the page
                 WebPage webPage = new WebPage(cleaned_texts,cleaned_titles,url,dates,getPageSize(url));
@@ -233,14 +234,14 @@ class Crawler
                 Elements links = doc.select("a[href]");
                 HashSet parent_url = new HashSet();
                 parent_url.add(url);
-                System.out.println("size: "+links.size());
+                logger.info("size: "+links.size());
 
                 for(Element ele : links) {
                     try{
                         // check whether the url is valid
                         String link = ele.attr("abs:href");
                         // writer.println(links.get(i));
-                        System.out.println(link);
+                        logger.info(link);
 
                         if(link==null) {
                             continue;
@@ -268,11 +269,10 @@ class Crawler
                 }
 
             }
-        }
-
-        catch (Exception e)
-        {
-            e.printStackTrace ();
+        } catch (Exception e) {
+            logger.error("Error while crawling");
+        }finally {
+            indexer.close();
         }
 
     }
@@ -281,15 +281,9 @@ class Crawler
         System.out.println("fetch started");
         Crawler.fetch();
         System.out.println("fetch finished");
-//        System.out.println(indexer.getChildIdsByPageId(0));
-//        System.out.println(indexer.getChildIdsByPageId(1));
-//        System.out.println(indexer.getChildIdsByPageId(2));
-//        System.out.println(indexer.getChildIdsByPageId(3));
-        System.out.println(indexer.getChildIdsByPageId(4));
-//        System.out.println(indexer.getChildIdsByPageId(5));
-//        indexer.displayAllIndex();
-        System.out.println(indexer.getParentLinksByPageId(2));
-        System.out.println(indexer.getTfMax(2));
+        //System.out.println(indexer.getTitlePostingListByWord("the"));
+        //System.out.println(indexer.getParentLinksByPageId(2));
+        //System.out.println(indexer.getTfMax(2));
 
 
     }
