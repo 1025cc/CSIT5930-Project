@@ -67,6 +67,20 @@ public class SearchResult {
     public void setChildLinks(Set<String> childLinks) {
         this.childLinks = childLinks;
     }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SearchResult {\n");
+        sb.append("  title: ").append(title).append('\n');
+        sb.append("  url: ").append(url).append('\n');
+        sb.append("  lastModifiedDate: ").append(lastModifiedDate).append('\n');
+        sb.append("  size: ").append(size).append('\n');
+        sb.append("  top5Keywords: ").append(top5Keywords).append('\n');
+        sb.append("  parentLinks: ").append(parentLinks).append('\n');
+        sb.append("  childLinks: ").append(childLinks).append('\n');
+        sb.append('}');
+        return sb.toString();
+    }
 
 }
 

@@ -2,31 +2,26 @@ package com.csit5930.searchengine.controller;
 
 import com.csit5930.searchengine.service.SearchService;
 import com.csit5930.searchengine.model.SearchResult;
-import org.rocksdb.RocksDBException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 public class SearchController {
 
     @Autowired
     private SearchService searchService;
 
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
 
     @GetMapping("/search")
-    public String search(@RequestParam("query") String query, Model model) {
+    public ResponseEntity<List<SearchResult>> search(@RequestParam("query") String query) {
         List<SearchResult> searchResults = searchService.search(query);
-        model.addAttribute("searchResults", searchResults);
-        return "results";
+        return ResponseEntity.status(HttpStatus.OK).body(searchResults);
     }
 }
 
