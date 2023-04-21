@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 
 public class PageRank {
-    private static final double DAMPING_FACTOR = 0.8;
+    private static final double DAMPING_FACTOR = 0.85;
     private static final int MAX_ITERATIONS = 100;
     private static final double CONVERGENCE_THRESHOLD = 0.0001;
 

@@ -420,7 +420,7 @@ public class Indexer {
      */
     public void addChildLinks(String url,Set<String> childLinks){
         int pageId = getPageIdByUrl(url);
-        Set<Integer> currentChildPageIds= getParentIdsByPageId(pageId);
+        Set<Integer> currentChildPageIds= getChildIdsByPageId(pageId);
         //convert all added child urls to ids
         Set<Integer> addedChidlPageIds = getPageIdsByUrls(childLinks);
         currentChildPageIds.addAll(addedChidlPageIds);

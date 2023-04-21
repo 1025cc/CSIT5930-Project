@@ -111,14 +111,14 @@ public class RocksDBUtil {
     }
     public void displayAllIndexes() {
         for (String columnFamily : columnFamilyHandleMap.keySet()) {
-            System.out.println("Column Family: " + columnFamily);
+            logger.info("Column Family: " + columnFamily);
             ColumnFamilyHandle columnFamilyHandle = columnFamilyHandleMap.get(columnFamily);
 
             try (RocksIterator iterator = db.newIterator(columnFamilyHandle)) {
                 for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                     Object key = SerializationUtil.deserialize(iterator.key());
                     Object value = SerializationUtil.deserialize(iterator.value());
-                    System.out.println("Key: " + key + ", Value: " + value);
+                    logger.info("Key: " + key + ", Value: " + value);
                 }
             } catch (Exception e) {
                 logger.error("Error during displaying all indexes: {}", e.getMessage());
