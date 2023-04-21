@@ -29,6 +29,10 @@ import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import com.csit5930.searchengine.model.WebPage;
 import com.csit5930.searchengine.indexer.Indexer;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 
 class Crawler
@@ -134,7 +138,7 @@ class Crawler
         {
             Crawler crawler = new Crawler();
 
-            int PageMax = 300;
+            int PageMax = 30;
             int pageID = 0;
             Map dict = new HashMap();
 
@@ -159,6 +163,8 @@ class Crawler
                 }
                 String url = queue.poll();
                 crawler.setURL(url);
+                // jsoup document
+                Document doc = Jsoup.connect(url).get();
 
                 // check url visited or not
                 if (!visited_urls.contains(url)) {
@@ -187,16 +193,22 @@ class Crawler
                 System.out.println("Current URL: "+url);
 
                 //extract text from title tag
-                Vector<String> words_title = crawler.extractTitle(url);
+                // Vector<String> words_title = crawler.extractTitle(url);
 
                 //extract text from body tag
-                Vector<String> words = crawler.extractBody();
+                // Vector<String> words = crawler.extractBody();
+
+                String titles = doc.title();
+                String texts  = doc.body().text();
+
+                String cleaned_titles = titles.replaceAll("[\\pP\\p{Punct}]","");
+                String cleaned_texts = texts.replaceAll("[\\pP\\p{Punct}]","");
 
                 //String body, String title, String url, String lastModifiedDate, int pageSize
 
                 String dates =  getLastModifiedDate(url).toString();
-                String title = String.join(" ", words_title);
-                String body  = String.join(" ",words);
+                // String title = String.join(" ", words_title);
+                // String body  = String.join(" ",words);
 
                 // writer.println("Title: "+words_title);
                 // writer.println("Body: "+words);
@@ -204,41 +216,45 @@ class Crawler
                 // writer.println("Last Modified Date: "+getLastModifiedDate(url));
                 // writer.println("");
 
-                System.out.println("Title: "+words_title);
-                System.out.println("Body: "+words);
+                System.out.println("Title: "+cleaned_titles);
+                System.out.println("Body: "+cleaned_texts);
                 System.out.println("Page size: "+getPageSize(url));
                 System.out.println("Last Modified Date: "+getLastModifiedDate(url));
-                System.out.println("");
+                System.out.println(" ");
 
                 // index the page
-                WebPage webPage = new WebPage(body,title,url,dates,getPageSize(url));
+                WebPage webPage = new WebPage(cleaned_texts,cleaned_titles,url,dates,getPageSize(url));
                 indexer.indexPage(webPage);
 
                 // iterate the child urls by BFS
                 // writer.println("Child URLs:");
-                Vector<String> links = crawler.extractLinks();
+
+                // Vector<String> links =
+                Elements links = doc.select("a[href]");
                 HashSet parent_url = new HashSet();
                 parent_url.add(url);
+                System.out.println("size: "+links.size());
 
-                for(int i = 0; i < links.size(); i++) {
+                for(Element ele : links) {
                     try{
                         // check whether the url is valid
-
+                        String link = ele.attr("abs:href");
                         // writer.println(links.get(i));
-                        System.out.println(links.get(i));
+                        System.out.println(link);
 
-                        if(links.get(i)==null) {
+                        if(link==null) {
                             continue;
                         }
                         else{
                             HashSet child_url = new HashSet();
-                            String child = links.get(i);
+                            String child = link;
                             child_url.add(child);
                             if(!queue.contains(child)) {
                                 pageID++;
                                 dict.put(child, pageID);
                                 queue.offer(child);
                                 // add parent and child urls
+
                                 indexer.addChildLinks(url, child_url);
                                 indexer.addParentLinks(child,parent_url);
 
@@ -265,7 +281,13 @@ class Crawler
         System.out.println("fetch started");
         Crawler.fetch();
         System.out.println("fetch finished");
-        System.out.println(indexer.getTitlePostingListByWord("the"));
+//        System.out.println(indexer.getChildIdsByPageId(0));
+//        System.out.println(indexer.getChildIdsByPageId(1));
+//        System.out.println(indexer.getChildIdsByPageId(2));
+//        System.out.println(indexer.getChildIdsByPageId(3));
+        System.out.println(indexer.getChildIdsByPageId(4));
+//        System.out.println(indexer.getChildIdsByPageId(5));
+//        indexer.displayAllIndex();
         System.out.println(indexer.getParentLinksByPageId(2));
         System.out.println(indexer.getTfMax(2));
 
