@@ -19,12 +19,12 @@ import org.htmlparser.util.NodeList;
 import org.htmlparser.util.ParserException;
 
 
-
 import org.htmlparser.beans.LinkBean;
 import java.net.URL;
 
 import java.sql.Date;
 import java.net.URLConnection;
+import java.net.HttpURLConnection;
 import com.csit5930.searchengine.model.WebPage;
 import com.csit5930.searchengine.indexer.Indexer;
 import org.jsoup.Jsoup;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 class Crawler
 {
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
-
     private static String url;
     public static Indexer indexer;
 
@@ -142,13 +141,11 @@ class Crawler
 
             int PageMax = 30;
             int pageID = 0;
+            int n = 0;
             Map dict = new HashMap();
 
             ArrayList<String> visited_urls = new ArrayList<String>();
 
-            // write the result into file
-            // File outputFile = new File("Spider.txt");
-            // PrintWriter writer = new PrintWriter(outputFile);
 
             Queue<String> queue = new LinkedList<String>();
             String initial_url = "https://www.cse.ust.hk/~kwtleung/COMP4321/testpage.htm";
@@ -157,7 +154,7 @@ class Crawler
             dict.put(initial_url,pageID);
 
 
-            for(int n = 0; n < PageMax; n++) {
+            while (n < PageMax) {
 
                 if(queue.isEmpty())
                 {
@@ -179,18 +176,9 @@ class Crawler
                     visited_urls.add(url);
                 }
 
-                // check url in indexer or not
-                while (indexer.getPageInfoByUrl(url)!=null) {
-                    url = queue.poll();
-                }
 
                 Object current_pageID = dict.get(url);
-
-                // writer.println("");
-                // writer.println("");
-                // writer.println("Current PageID: " + current_pageID);
-                // writer.println("Current URL: "+url);
-
+                logger.info(" ");
                 logger.info("Current PageID: " + current_pageID);
                 logger.info("Current URL: " + url);
 
@@ -205,42 +193,48 @@ class Crawler
 
                 String cleaned_titles = titles.replaceAll("[\\pP\\p{Punct}]","");
                 String cleaned_texts = texts.replaceAll("[\\pP\\p{Punct}]","");
-
-                //String body, String title, String url, String lastModifiedDate, int pageSize
-
                 String dates =  getLastModifiedDate(url).toString();
                 // String title = String.join(" ", words_title);
                 // String body  = String.join(" ",words);
 
-                // writer.println("Title: "+words_title);
-                // writer.println("Body: "+words);
-                // writer.println("Page size: "+getPageSize(url));
-                // writer.println("Last Modified Date: "+getLastModifiedDate(url));
-                // writer.println("");
 
                 logger.info("Title: " + cleaned_titles);
                 logger.info("Body: " + cleaned_texts);
                 logger.info("Page size: " + getPageSize(url));
                 logger.info("Last Modified Date: " + getLastModifiedDate(url));
+                System.out.println(" ");
 
-                // index the page
-                WebPage webPage = new WebPage(cleaned_texts,cleaned_titles,url,dates,getPageSize(url));
-                indexer.indexPage(webPage);
+                //String body, String title, String url, String lastModifiedDate, int pageSize
+                WebPage webPage = new WebPage(cleaned_texts, cleaned_titles, url,dates, getPageSize(url));
+
+                // check url in indexer or not
+                Object InfoSphere = indexer.getPageInfoByUrl(url);
+                if (InfoSphere!=null){
+                    if (indexer.getPageInfoByUrl(url).getLastModifiedDate() == getLastModifiedDate(url).toString()){
+                        // check last_modified_date == saved date
+                        indexer.updatePage(webPage);
+                    }
+                }
+                else {
+                    // index the page
+                    n++;
+                    indexer.indexPage(webPage);
+                }
+
+
+
 
                 // iterate the child urls by BFS
-                // writer.println("Child URLs:");
 
-                // Vector<String> links =
                 Elements links = doc.select("a[href]");
                 HashSet parent_url = new HashSet();
                 parent_url.add(url);
-                logger.info("size: "+links.size());
+                System.out.println("size: "+links.size());
 
                 for(Element ele : links) {
                     try{
                         // check whether the url is valid
                         String link = ele.attr("abs:href");
-                        // writer.println(links.get(i));
                         logger.info(link);
 
                         if(link==null) {
@@ -250,16 +244,14 @@ class Crawler
                             HashSet child_url = new HashSet();
                             String child = link;
                             child_url.add(child);
-                            if(!queue.contains(child)) {
-                                pageID++;
-                                dict.put(child, pageID);
-                                queue.offer(child);
-                                // add parent and child urls
 
-                                indexer.addChildLinks(url, child_url);
-                                indexer.addParentLinks(child,parent_url);
+                            pageID++;
+                            dict.put(child, pageID);
+                            queue.offer(child);
+                            // add parent and child urls
+                            indexer.addChildLinks(url, child_url);
+                            indexer.addParentLinks(child,parent_url);
 
-                                }
                             }
 
                         }
@@ -269,10 +261,11 @@ class Crawler
                 }
 
             }
-        } catch (Exception e) {
-            logger.error("Error while crawling");
-        }finally {
-            indexer.close();
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace ();
         }
 
     }
@@ -281,9 +274,11 @@ class Crawler
         System.out.println("fetch started");
         Crawler.fetch();
         System.out.println("fetch finished");
-        //System.out.println(indexer.getTitlePostingListByWord("the"));
-        //System.out.println(indexer.getParentLinksByPageId(2));
-        //System.out.println(indexer.getTfMax(2));
+//        System.out.println(indexer.getChildIdsByPageId(4));
+//        System.out.println(indexer.getPageInfoById(2));
+//        indexer.displayAllIndex();
+//        System.out.println(indexer.getParentLinksByPageId(2));
+//        System.out.println(indexer.getTfMax(2));
 
 
     }
