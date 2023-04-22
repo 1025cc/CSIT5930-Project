@@ -210,8 +210,10 @@ class Crawler
                 // check url in indexer or not
                 Object InfoSphere = indexer.getPageInfoByUrl(url);
                 if (InfoSphere!=null){
-                    if (indexer.getPageInfoByUrl(url).getLastModifiedDate() == getLastModifiedDate(url).toString()){
-                        // check last_modified_date == saved date
+                    String old_date = indexer.getPageInfoByUrl(url).getLastModifiedDate();
+                    if (!getLastModifiedDate(url).toString().contentEquals(old_date)){
+                        // check last_modified_date != saved date
+                        logger.info("Date changed -> indexer update");
                         indexer.updatePage(webPage);
                     }
                 }
