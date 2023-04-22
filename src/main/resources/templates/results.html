@@ -6,7 +6,7 @@
 <body>
 <h1>Search Results</h1>
 <table>
-    <tr th:each="result : ${results}">
+    <tr th:each="result : ${searchResults}">
         <td th:text="${result.title}"></td>
         <td th:text="${result.url}"></td>
         <td th:text="${result.lastModifiedDate}"></td>

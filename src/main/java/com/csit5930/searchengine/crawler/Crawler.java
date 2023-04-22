@@ -22,7 +22,7 @@ import org.htmlparser.util.ParserException;
 import org.htmlparser.beans.LinkBean;
 import java.net.URL;
 
-import java.sql.Date;
+
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import com.csit5930.searchengine.model.WebPage;
@@ -139,7 +139,7 @@ class Crawler
         {
             Crawler crawler = new Crawler();
 
-            int PageMax = 30;
+            int PageMax = 300;
             int pageID = 0;
             int n = 0;
             Map dict = new HashMap();
@@ -271,9 +271,9 @@ class Crawler
     }
 
     public static void main(String[] args){
-        System.out.println("fetch started");
+        logger.info("fetch started");
         Crawler.fetch();
-        System.out.println("fetch finished");
+        logger.info("fetch finished");
 //        System.out.println(indexer.getChildIdsByPageId(4));
 //        System.out.println(indexer.getPageInfoById(2));
 //        indexer.displayAllIndex();
