@@ -17,12 +17,12 @@ public class SearchController {
     @Autowired
     private SearchService searchService;
 
-    @GetMapping("/search")
+    @GetMapping("/")
     public String index() {
         return "index";
     }
 
-    @GetMapping("/search/results")
+    @GetMapping("/search")
     public String search(@RequestParam("query") String query, Model model) {
         List<SearchResult> searchResults = searchService.search(query);
         model.addAttribute("searchResults", searchResults);
