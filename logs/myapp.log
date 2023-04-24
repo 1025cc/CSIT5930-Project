@@ -1,0 +1,23 @@
+2023-04-24 00:12:14 [main] INFO  c.c.s.SearchEngineApplication - Starting SearchEngineApplication using Java 18.0.2.1 with PID 98483 (/Users/gisellelong/Desktop/CSIT5930-Project/target/classes started by gisellelong in /Users/gisellelong/Desktop/CSIT5930-Project)
+2023-04-24 00:12:14 [main] INFO  c.c.s.SearchEngineApplication - No active profile set, falling back to 1 default profile: "default"
+2023-04-24 00:12:16 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2023-04-24 00:12:16 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2023-04-24 00:12:16 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.7]
+2023-04-24 00:12:16 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2023-04-24 00:12:16 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2170 ms
+2023-04-24 00:12:18 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2023-04-24 00:12:18 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2023-04-24 00:12:18 [main] INFO  c.c.s.SearchEngineApplication - Started SearchEngineApplication in 5.788 seconds (process running for 6.445)
+2023-04-24 00:13:51 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2023-04-24 00:13:51 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2023-04-24 00:13:51 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2023-04-24 02:39:42 [main] INFO  c.c.s.SearchEngineApplication - Starting SearchEngineApplication using Java 18.0.2.1 with PID 99329 (/Users/gisellelong/Desktop/CSIT5930-Project/target/classes started by gisellelong in /Users/gisellelong/Desktop/CSIT5930-Project)
+2023-04-24 02:39:42 [main] INFO  c.c.s.SearchEngineApplication - No active profile set, falling back to 1 default profile: "default"
+2023-04-24 02:39:44 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2023-04-24 02:39:44 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2023-04-24 02:39:44 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.7]
+2023-04-24 02:39:44 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2023-04-24 02:39:44 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1880 ms
+2023-04-24 02:39:45 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page template: index
+2023-04-24 02:39:45 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2023-04-24 02:39:45 [main] INFO  c.c.s.SearchEngineApplication - Started SearchEngineApplication in 4.845 seconds (process running for 5.542)

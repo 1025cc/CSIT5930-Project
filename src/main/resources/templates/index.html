@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Search Engine</title>
 </head>
 <body>
-<h1>Search Engine</h1>
-<form th:action="@{/search}" method="get">
-    <input type="text" name="query" placeholder="Enter your query" required>
-    <button type="submit">Search</button>
-</form>
+    <form th:action="@{/search}" method="get">
+        <label for="search-input">Search:</label>
+        <input type="text" id="search-input" name="query">
+        <button type="submit">Search</button>
+    </form>
+    <div th:if="${searchResults}">
+        <h2>Search Results</h2>
+        <ul>
+            <li th:each="result : ${searchResults}">
+                <td th:text="${result.title}"></td>
+                <td th:text="${result.url}"></td>
+                <td th:text="${result.lastModifiedDate}"></td>
+                <td th:text="${result.size}"></td>
+            </li>
+        </ul>
+    </div>
 </body>
 </html>
