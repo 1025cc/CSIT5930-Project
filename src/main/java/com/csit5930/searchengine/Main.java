@@ -1,7 +1,10 @@
 package com.csit5930.searchengine;
 
+import com.csit5930.searchengine.crawler.Crawler;
 import com.csit5930.searchengine.indexer.Indexer;
 import com.csit5930.searchengine.utils.PageRank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,24 +14,14 @@ import java.util.Set;
 public class Main {
 
 
-    // Method to start the crawling process
-    public void startCrawling(String seedUrl, int maxPages) {
-        // Implement the logic to start the web crawler with the given seed URL and maximum number of pages to crawl
-    }
-
-    // Method to index the crawled pages
-    public void indexPages() {
-        // Implement the logic to index the crawled pages
-    }
-
-    // Method to compute PageRank for the indexed pages
-    public void calculatePageRank() {
-
-
-    }
-
-    //todo crawl
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
+        //crawling and indexing
+        logger.info("fetch started");
+        Crawler.fetch();
+        logger.info("fetch finished");
+        //calculate page rank value
+        logger.info("page rank start");
         Indexer indexer = new Indexer();
         List<Integer> pageIds = indexer.getAllPageIds();
         Map<Integer, Set<Integer>> childToParentLinks = new HashMap<>();
@@ -45,5 +38,7 @@ public class Main {
             double pageRankValue = pageRank.getPageRank(pageId);
             indexer.putPageRankValue(pageId,pageRankValue);
         }
+        indexer.close();
+        logger.info("page rank end");
     }
 }

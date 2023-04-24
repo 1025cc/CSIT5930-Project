@@ -35,18 +35,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-class Crawler
+public class Crawler
 {
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
     private static String url;
-    public static Indexer indexer;
+    public static Indexer indexer = new Indexer();
 
-    Crawler() {
-        url = null;
-        indexer = new Indexer();
-    }
 
-    public void setURL(String _url) {
+    public static void setURL(String _url) {
         url = _url;
     }
 
@@ -137,7 +133,6 @@ class Crawler
     {
         try
         {
-            Crawler crawler = new Crawler();
 
             int PageMax = 300;
             int pageID = 0;
@@ -161,7 +156,7 @@ class Crawler
                     break;
                 }
                 String url = queue.poll();
-                crawler.setURL(url);
+                setURL(url);
                 // jsoup document
                 Document doc = Jsoup.connect(url).get();
 
@@ -263,15 +258,18 @@ class Crawler
                 }
 
             }
-        }
-
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace ();
+        }finally {
+            indexer.close();
         }
 
     }
 
+    /**
+     * test function
+     * @param args
+     */
     public static void main(String[] args){
         logger.info("fetch started");
         Crawler.fetch();

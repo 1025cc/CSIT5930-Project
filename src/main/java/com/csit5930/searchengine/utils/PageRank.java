@@ -70,6 +70,11 @@ public class PageRank {
             pageRanks.put(pageId, normalizedPageRank);
         }
     }
+
+    /**
+     * test function
+     * @param args
+     */
     public static void main(String[] args) {
         Map<Integer, Set<Integer>> childToParentLinks = new HashMap<>();
         Map<Integer, Set<Integer>> parentToChildLinks =new HashMap<>();
