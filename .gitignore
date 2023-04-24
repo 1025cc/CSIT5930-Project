@@ -38,3 +38,5 @@ build/
 /mvnw
 /mvnw.bat
 mvnw.cmd
+
+.DS_Store
