@@ -16,7 +16,7 @@ public class SearchServiceImpl implements SearchService {
     /**
      * favor the title matches
      */
-    private final int TITLE_BOOST_FACTOR = 5;
+    private final int TITLE_BOOST_FACTOR = 3;
     /**
      * the maximum num of the search results
      */
@@ -30,13 +30,51 @@ public class SearchServiceImpl implements SearchService {
         List<String> queryTokens = Tokenizer.tokenize(query);
         //page id->(token,tf)
         Map<Integer, Map<String, Double>> documentVectors = buildDocumentVectors(queryTokens);
+        //all title matched page ids
+        Set<Integer> titleMatched = getTitleMatchedPage(queryTokens);
 
         //Calculate score for ranking
         //page ids and corresponding scores of top 50 pages
-        List<HashMap.SimpleEntry<Integer,Double>> top50Pages = getTopPages(queryTokens, documentVectors);
+        List<HashMap.SimpleEntry<Integer,Double>> top50Pages = getTopPages(queryTokens, documentVectors,titleMatched);
 
         List<SearchResult> results = processResults(top50Pages);
         return results;
+    }
+
+    private Set<Integer> getTitleMatchedPage(List<String> queryTokens) {
+        Set<Integer> titleMatched = new HashSet<>();
+
+        for (String token : queryTokens) {
+            if (!token.contains(" ")) {
+                //get word title matched
+                Set<Posting> postings = indexer.getTitlePostingListByWord(token);
+                for (Posting posting:postings) {
+                    titleMatched.add(posting.getPageID());
+                }
+            } else {
+                //get phrase title matched
+                // Tokenize the phrase
+                String[] words = token.split(" ");
+
+                //Page ids of all words in the phrase appear together
+                HashSet<Integer> titleIntersection = new HashSet<>();
+                // Retrieve posting lists for each word in the phrase
+                for (int i = 0;i<words.length;i++) {
+                    words[i] = Tokenizer.tokenizeSingle(words[i]);
+                    Set<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
+                    intersect(titleIntersection, titlePostingList);
+                }
+                // Check if the word positions form a valid phrase in each page title
+                for (int pageId : titleIntersection) {
+                    int validCount = countPhraseOccurrences(words, pageId,1);
+                    if (validCount > 0) {
+                        titleMatched.add(pageId);
+                    }
+                }
+            }
+
+        }
+        return titleMatched;
     }
 
     private List<SearchResult> processResults(List<HashMap.SimpleEntry<Integer,Double>> topPages) {
@@ -52,17 +90,18 @@ public class SearchServiceImpl implements SearchService {
             searchResult.setTop5Keywords(indexer.getTop5KeywordByPageId(pageId));
             searchResult.setChildLinks(indexer.getChildLinksByPageId(pageId));
             searchResult.setParentLinks(indexer.getParentLinksByPageId(pageId));
-            searchResult.setScore(String.format("%.4f", pageEntry.getValue()));
+            searchResult.setScore(String.format("%.10f", pageEntry.getValue()));
             results.add(searchResult);
         }
         return results;
     }
 
-    private List<HashMap.SimpleEntry<Integer,Double>> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors) {
+    private List<HashMap.SimpleEntry<Integer,Double>> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors,Set<Integer> titleMatched) {
         //using priority queue to get top 50 pages
         PriorityQueue<HashMap.SimpleEntry<Integer, Double>> ranking = new PriorityQueue<>(MAX_OUTPUT_NUM,
                 (a, b) -> Double.compare(a.getValue(), b.getValue())
         );
+        double minMatchingScore = Double.MAX_VALUE;
 
         for (Map.Entry<Integer, Map<String, Double>> entry : documentVectors.entrySet()) {
             int pageId = entry.getKey();
@@ -71,10 +110,29 @@ public class SearchServiceImpl implements SearchService {
             double cosineSimilarity = calculateCosineSimilarity(queryTokens, documentVector);
             double pageRankValue = indexer.getPageRankValue(pageId);
             double score = 0.4 * pageRankValue + 0.6 * cosineSimilarity;
+            //boosting title matching
+            if(titleMatched.contains(pageId)){
+                score *= TITLE_BOOST_FACTOR;
+                titleMatched.remove(pageId);
+                minMatchingScore = Math.min(minMatchingScore,score);
+            }
             HashMap.SimpleEntry<Integer,Double> scoreEntry = new HashMap.SimpleEntry<>(pageId,score);
             if (ranking.size() < MAX_OUTPUT_NUM) {
                 ranking.add(scoreEntry);
-            } else if (cosineSimilarity > ranking.peek().getValue()) {
+            } else if (score > ranking.peek().getValue()) {
+                // Remove the document with the lowest score
+                ranking.poll();
+                ranking.add(scoreEntry);
+            }
+        }
+        //for those only appear in title
+        for(int pageId:titleMatched){
+            double pageRankValue = indexer.getPageRankValue(pageId);
+            double score = minMatchingScore + pageRankValue;
+            HashMap.SimpleEntry<Integer,Double> scoreEntry = new HashMap.SimpleEntry<>(pageId,score);
+            if (ranking.size() < MAX_OUTPUT_NUM) {
+                ranking.add(scoreEntry);
+            } else if (score > ranking.peek().getValue()) {
                 // Remove the document with the lowest score
                 ranking.poll();
                 ranking.add(scoreEntry);
@@ -149,14 +207,11 @@ public class SearchServiceImpl implements SearchService {
 
         //Page ids of all words in the phrase appear together
         HashSet<Integer> contentIntersection = new HashSet<>();
-        HashSet<Integer> titleIntersection = new HashSet<>();
         // Retrieve posting lists for each word in the phrase
         for (int i = 0;i<words.length;i++) {
             words[i] = Tokenizer.tokenizeSingle(words[i]);
             Set<Posting> contentPostingList = indexer.getContentPostingListByWord(words[i]);
-            Set<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
             intersect(contentIntersection, contentPostingList);
-            intersect(titleIntersection, titlePostingList);
         }
 
         // Check if the word positions form a valid phrase in each page content
@@ -165,13 +220,6 @@ public class SearchServiceImpl implements SearchService {
             int validCount = countPhraseOccurrences(words, pageId,0);
             if (validCount > 0) {
                 result.put(pageId, validCount);
-            }
-        }
-        // Check if the word positions form a valid phrase in each page title
-        for (int pageId : titleIntersection) {
-            int validCount = countPhraseOccurrences(words, pageId,1);
-            if (validCount > 0) {
-                result.put(pageId, result.getOrDefault(pageId, 1) * TITLE_BOOST_FACTOR);
             }
         }
         return result;
@@ -225,18 +273,11 @@ public class SearchServiceImpl implements SearchService {
         HashMap<Integer,Integer> termFreq = new HashMap<>();
         //Get a list of postings according to the word
         Set<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
-        Set<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
         //get tf_ij for word i in page j
         for (Posting posting : contentPostingList) {
             int tf = posting.getTermFreq();
             int pageId = posting.getPageID();
             termFreq.put(pageId, tf);
-        }
-        //boosting title matching
-        for (Posting posting : titlePostingList) {
-            int pageId = posting.getPageID();
-            int tf = termFreq.getOrDefault(pageId,1) * TITLE_BOOST_FACTOR;
-            termFreq.put(pageId,tf);
         }
         return termFreq;
     }

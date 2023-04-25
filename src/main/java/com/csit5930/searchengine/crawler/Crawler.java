@@ -38,76 +38,8 @@ import org.slf4j.LoggerFactory;
 public class Crawler
 {
     private static final Logger logger = LoggerFactory.getLogger(Crawler.class);
-    private static String url;
     public static Indexer indexer = new Indexer();
 
-
-    public static void setURL(String _url) {
-        url = _url;
-    }
-
-    public static Vector<String> extractTitle(String _url) throws ParserException
-    {
-        Vector<String> result = new Vector<String>();
-        Parser parser = new Parser(_url);
-        parser.setEncoding("UTF-8");
-        NodeList list = new NodeList();
-        NodeFilter filter = new TagNameFilter("title");
-        for(NodeIterator e = parser.elements();e.hasMoreNodes();) {
-            e.nextNode().collectInto(list,filter);
-        }
-        for(int i = 0; i < list.size(); i++) {
-            Node e = list.elementAt(i);
-            if(e instanceof TitleTag) {
-                String str = ((TitleTag)e).getTitle();
-                StringTokenizer st = new StringTokenizer(str);
-                while (st.hasMoreTokens()) {
-                    String a = st.nextToken();
-                    if(a.matches("^[A-Za-z0-9]+")&&a!=null)
-                        result.add(a);
-                }
-            }
-        }
-        return result;
-    }
-
-    public Vector<String> extractBody() throws ParserException
-    {
-        Vector<String> result = new Vector<String>();
-        Parser parser = new Parser(url);
-        parser.setEncoding("UTF-8");
-        NodeList list = new NodeList();
-        NodeFilter filter = new TagNameFilter("body");
-        for(NodeIterator e = parser.elements();e.hasMoreNodes();) {
-            e.nextNode().collectInto(list,filter);
-        }
-        for(int i = 0; i < list.size(); i++) {
-            Node e = list.elementAt(i);
-            if(e instanceof BodyTag) {
-                String str = ((BodyTag)e).getBody();
-                StringTokenizer st = new StringTokenizer(str);
-                while (st.hasMoreTokens()) {
-                    String a = st.nextToken();
-                    if(a.matches("^[A-Za-z0-9]+")&&a!=null)
-                        result.add(a);
-                }
-            }
-        }
-        return result;
-    }
-    public Vector<String> extractLinks() throws ParserException
-
-    {
-        // extract links in url and return them
-        Vector<String> result = new Vector<String>();
-        LinkBean bean = new LinkBean();
-        bean.setURL(url);
-        URL[] urls = bean.getLinks();
-        for (URL s : urls) {
-            result.add(s.toString());
-        }
-        return result;
-    }
     public static Date getLastModifiedDate(String _url) throws IOException {
         URL u = new URL(_url);
         URLConnection connection = u.openConnection();
@@ -156,9 +88,6 @@ public class Crawler
                     break;
                 }
                 String url = queue.poll();
-                setURL(url);
-                // jsoup document
-                Document doc = Jsoup.connect(url).get();
 
                 // check url visited or not
                 if (!visited_urls.contains(url)) {
@@ -170,7 +99,11 @@ public class Crawler
                     }
                     visited_urls.add(url);
                 }
-
+                if(url == null){
+                    return;
+                }
+                // jsoup document
+                Document doc = Jsoup.connect(url).get();
 
                 Object current_pageID = dict.get(url);
                 logger.info(" ");
