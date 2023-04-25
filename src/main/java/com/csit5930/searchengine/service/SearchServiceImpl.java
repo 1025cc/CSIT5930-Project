@@ -108,7 +108,7 @@ public class SearchServiceImpl implements SearchService {
             Map<String, Double> documentVector = entry.getValue();
             //combine the pagerank values with cosine similarity
             double cosineSimilarity = calculateCosineSimilarity(queryTokens, documentVector);
-            double pageRankValue = indexer.getPageRankValue(pageId);
+            double pageRankValue = indexer.getPageRankValue(pageId) * 10;
             double score = 0.4 * pageRankValue + 0.6 * cosineSimilarity;
             //boosting title matching
             if(titleMatched.contains(pageId)){
@@ -127,7 +127,7 @@ public class SearchServiceImpl implements SearchService {
         }
         //for those only appear in title
         for(int pageId:titleMatched){
-            double pageRankValue = indexer.getPageRankValue(pageId);
+            double pageRankValue = indexer.getPageRankValue(pageId) * 10;
             double score = minMatchingScore + pageRankValue;
             HashMap.SimpleEntry<Integer,Double> scoreEntry = new HashMap.SimpleEntry<>(pageId,score);
             if (ranking.size() < MAX_OUTPUT_NUM) {

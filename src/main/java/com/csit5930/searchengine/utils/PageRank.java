@@ -1,6 +1,8 @@
 package com.csit5930.searchengine.utils;
 
 
+import com.csit5930.searchengine.indexer.Indexer;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,18 +78,23 @@ public class PageRank {
      * @param args
      */
     public static void main(String[] args) {
+        Indexer indexer = new Indexer();
+        List<Integer> pageIds = indexer.getAllPageIds();
         Map<Integer, Set<Integer>> childToParentLinks = new HashMap<>();
         Map<Integer, Set<Integer>> parentToChildLinks =new HashMap<>();
-        childToParentLinks.put(1,Stream.of(3).collect(Collectors.toSet()));
-        childToParentLinks.put(2,Stream.of(1).collect(Collectors.toSet()));
-        childToParentLinks.put(3,Stream.of(1,2,4).collect(Collectors.toSet()));
-        childToParentLinks.put(4,Stream.of(3).collect(Collectors.toSet()));
-        parentToChildLinks.put(1,Stream.of(2,3).collect(Collectors.toSet()));
-        parentToChildLinks.put(2,Stream.of(3).collect(Collectors.toSet()));
-        parentToChildLinks.put(3,Stream.of(1,4).collect(Collectors.toSet()));
-        parentToChildLinks.put(4,Stream.of(3).collect(Collectors.toSet()));
+        for(int pageId:pageIds){
+            Set<Integer> childPages = indexer.getChildIdsByPageId(pageId);
+            Set<Integer> parentPages = indexer.getParentIdsByPageId(pageId);
+            childToParentLinks.put(pageId,parentPages);
+            parentToChildLinks.put(pageId,childPages);
+        }
         PageRank pageRank = new PageRank(childToParentLinks,parentToChildLinks);
         pageRank.computePageRanks();
+        for(int pageId:pageIds){
+            double pageRankValue = pageRank.getPageRank(pageId);
+            indexer.putPageRankValue(pageId,pageRankValue);
+        }
+        indexer.close();
     }
 
 }
