@@ -3,6 +3,7 @@ package com.csit5930.searchengine.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Stored in inverted index file
@@ -68,5 +69,17 @@ public class Posting implements Serializable {
                 ", termFreq=" + termFreq +
                 ", wordPosition=" + wordPosition +
                 '}';
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Posting posting = (Posting) o;
+        return pageID == posting.pageID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pageID);
     }
 }

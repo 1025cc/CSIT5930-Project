@@ -153,8 +153,8 @@ public class SearchServiceImpl implements SearchService {
         // Retrieve posting lists for each word in the phrase
         for (int i = 0;i<words.length;i++) {
             words[i] = Tokenizer.tokenizeSingle(words[i]);
-            List<Posting> contentPostingList = indexer.getContentPostingListByWord(words[i]);
-            List<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
+            Set<Posting> contentPostingList = indexer.getContentPostingListByWord(words[i]);
+            Set<Posting> titlePostingList = indexer.getTitlePostingListByWord(words[i]);
             intersect(contentIntersection, contentPostingList);
             intersect(titleIntersection, titlePostingList);
         }
@@ -177,7 +177,7 @@ public class SearchServiceImpl implements SearchService {
         return result;
     }
 
-    private void intersect(HashSet<Integer> titleIntersection, List<Posting> titlePostingList) {
+    private void intersect(HashSet<Integer> titleIntersection, Set<Posting> titlePostingList) {
         if (titlePostingList != null) {
             //Get all page ids for calculating intersection
             Set<Integer> pageIds = new HashSet<>();
@@ -224,8 +224,8 @@ public class SearchServiceImpl implements SearchService {
     public HashMap<Integer,Integer> computeTermFreqWord(String word){
         HashMap<Integer,Integer> termFreq = new HashMap<>();
         //Get a list of postings according to the word
-        List<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
-        List<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
+        Set<Posting> contentPostingList = indexer.getContentPostingListByWord(word);
+        Set<Posting> titlePostingList = indexer.getTitlePostingListByWord(word);
         //get tf_ij for word i in page j
         for (Posting posting : contentPostingList) {
             int tf = posting.getTermFreq();

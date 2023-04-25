@@ -88,9 +88,9 @@ public class Indexer {
             int wordId = getWordIdByWord(word);
             List<Integer> wordPosition = wordPositions.get(word);
             Posting posting= new Posting(pageId,wordPosition.size(),wordPosition);
-            List<Posting> postingList= (List<Posting>) rocksDBUtil.get(indexType,wordId);
+            Set<Posting> postingList= (Set<Posting>) rocksDBUtil.get(indexType,wordId);
             if(postingList == null){
-                postingList = new ArrayList<>();
+                postingList = new HashSet<>();
             }
             postingList.add(posting);
             rocksDBUtil.put(indexType,wordId,postingList);
@@ -117,7 +117,7 @@ public class Indexer {
         for(String word:keywordFreqMap.keySet()){
             int wordId = getWordIdByWord(word);
             // Remove the old posting for this page
-            List<Posting> postingList = (List<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING, wordId);
+            Set<Posting> postingList = (Set<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING, wordId);
             postingList.removeIf(p -> p.getPageID() == pageId);
         }
         //delete title inverted index
@@ -126,7 +126,7 @@ public class Indexer {
         for(String word:titleTokens){
             int wordId =  getWordIdByWord(word);
             // Remove the old posting for this page
-            List<Posting> postingList = (List<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING_TITLE, wordId);
+            Set<Posting> postingList = (Set<Posting>) rocksDBUtil.get(WORD_ID_TO_POSTING_TITLE, wordId);
             postingList.removeIf(p -> p.getPageID() == pageId);
         }
         rocksDBUtil.delete(PAGE_ID_TO_KEYWORDS,pageId);
@@ -154,6 +154,21 @@ public class Indexer {
         }
     }
 
+    /**
+     * maintain the total number of all words
+     * @param num
+     */
+    public void addTotalWordNum(int num){
+        //store W->number of all pages
+        byte[] W = SerializationUtil.serialize("W");
+        byte[] NValue = rocksDBUtil.get(W);
+        if(NValue == null){
+            rocksDBUtil.put(W,SerializationUtil.serialize(num));
+        }else {
+            int tmp = (int)SerializationUtil.deserialize(NValue);
+            rocksDBUtil.put(W,SerializationUtil.serialize(tmp+num));
+        }
+    }
 
     private HashMap<String, Integer> getKeywordFreqMap(HashMap<String, List<Integer>> wordPositions) {
         HashMap<String,Integer> keywordFreqMap = new HashMap<>();
@@ -179,11 +194,11 @@ public class Indexer {
         if(wordId == null){
             int newWordId = wordIdCounter.getAndIncrement();
             rocksDBUtil.put(WORD_TO_WORD_ID,word,newWordId);
+            addTotalWordNum(1);
             return newWordId;
         }else{
             return wordId;
         }
-
     }
 
     private HashMap<String, List<Integer>> calculateWordPositions(List<String> words) {
@@ -208,18 +223,18 @@ public class Indexer {
         }
         return max;
     }
-    public List<Posting> getContentPostingListByWord(String word) {
+    public Set<Posting> getContentPostingListByWord(String word) {
         byte[] wordId = rocksDBUtil.get(WORD_TO_WORD_ID,SerializationUtil.serialize(word));
         byte[] tmp = rocksDBUtil.get(WORD_ID_TO_POSTING, wordId);
         Object o =  SerializationUtil.deserialize(tmp);
-        List<Posting> postings = o == null?new ArrayList<>():(List<Posting>) o;
+        Set<Posting> postings = o == null?new HashSet<>():(Set<Posting>) o;
         return postings;
     }
-    public List<Posting> getTitlePostingListByWord(String word) {
+    public Set<Posting> getTitlePostingListByWord(String word) {
         byte[] wordId = rocksDBUtil.get(WORD_TO_WORD_ID,SerializationUtil.serialize(word));
         byte[] tmp = rocksDBUtil.get(WORD_ID_TO_POSTING_TITLE, wordId);
         Object o =  SerializationUtil.deserialize(tmp);
-        List<Posting> postings = o == null?new ArrayList<>():(List<Posting>) o;
+        Set<Posting> postings = o == null?new HashSet<>():(Set<Posting>) o;
         return postings;
     }
 
@@ -231,7 +246,7 @@ public class Indexer {
      * @return
      */
     public List<Integer> getWordPositions(String word,int pageId,int flag) {
-        List<Posting> postings;
+        Set<Posting> postings;
         if(flag == 0){
             postings = getContentPostingListByWord(word);
         }else{

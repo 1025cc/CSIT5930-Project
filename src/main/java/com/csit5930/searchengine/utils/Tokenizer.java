@@ -20,6 +20,9 @@ public class Tokenizer {
     public static List<String> tokenize(String queryString) {
         List<String> queryTokens = new ArrayList<>();
 
+        // Convert queryString to lowercase
+        queryString = queryString.toLowerCase();
+
         // Regular expression pattern to match words and phrases in double quotes
         Pattern pattern = Pattern.compile("\"[^\"]+\"|\\S+");
         Matcher matcher = pattern.matcher(queryString);
@@ -43,6 +46,9 @@ public class Tokenizer {
         return queryTokens;
     }
     public static String tokenizeSingle(String queryString){
+        // Convert queryString to lowercase
+        queryString = queryString.toLowerCase();
+
         String token = null;
         // Remove stop words
         if (!stopStem.isStopWord(queryString)) {
