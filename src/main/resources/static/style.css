@@ -1,30 +1,21 @@
 /*****************************************************************************/
 /* Colours */
-/* Blue: #002f5e */
-/* Crimson: #a91639 */
-/* Purple: #662d91 */
 /*****************************************************************************/
-body {
-    color: #000;
-}
 
 a, a:visited {
     color: #002f5e;
 }
 
-header, footer {
-    color: #fff;    
-}
-
-#site-title {
-    background-color: #002f5e;
+header, footer,
+header a, footer a,
+header a:visited, footer a:visited {
+    color: #fff;
 }
 
 footer {
     background-color: #c9e5ff; 
     color: #000;
 }
-
 
 /*****************************************************************************/
 /* Fonts */
@@ -37,10 +28,9 @@ body {
 }
 
 #site-title {
-    font-size: 2.0rem; 
-    text-align:center   
+    font-size: 2.0rem;
+    text-align:center
 }
-
 
 header a {
     text-decoration: none;
@@ -49,7 +39,6 @@ header a {
 header {
     text-shadow: 1px 1px rgba(0, 0, 0, 0.5);   
 }
-
 
 /*****************************************************************************/
 /*  General */
@@ -171,4 +160,3 @@ footer {
 #unit-signature {
     width: 100%;
 }
-
