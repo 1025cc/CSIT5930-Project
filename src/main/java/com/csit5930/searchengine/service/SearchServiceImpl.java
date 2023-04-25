@@ -32,16 +32,16 @@ public class SearchServiceImpl implements SearchService {
         Map<Integer, Map<String, Double>> documentVectors = buildDocumentVectors(queryTokens);
 
         //Calculate score for ranking
-        //page ids of top 50 pages
-        List<Integer> top50Pages = getTopPages(queryTokens, documentVectors);
+        //page ids and corresponding scores of top 50 pages
+        LinkedHashMap<Integer,Double> top50Pages = getTopPages(queryTokens, documentVectors);
 
         List<SearchResult> results = processResults(top50Pages);
         return results;
     }
 
-    private List<SearchResult> processResults(List<Integer> topPages) {
+    private List<SearchResult> processResults(LinkedHashMap<Integer,Double> topPages) {
         List<SearchResult> results = new ArrayList<>();
-        for(int pageId: topPages){
+        for(int pageId: topPages.keySet()){
             SearchResult searchResult = new SearchResult();
             PageInfo pageInfo= indexer.getPageInfoById(pageId);
             searchResult.setTitle(pageInfo.getTitle());
@@ -51,12 +51,13 @@ public class SearchServiceImpl implements SearchService {
             searchResult.setTop5Keywords(indexer.getTop5KeywordByPageId(pageId));
             searchResult.setChildLinks(indexer.getChildLinksByPageId(pageId));
             searchResult.setParentLinks(indexer.getParentLinksByPageId(pageId));
+            searchResult.setScore(String.format("%.4f", topPages.get(pageId)));
             results.add(searchResult);
         }
         return results;
     }
 
-    private List<Integer> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors) {
+    private LinkedHashMap<Integer,Double> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors) {
         //using priority queue to get top 50 pages
         PriorityQueue<HashMap.SimpleEntry<Integer, Double>> ranking = new PriorityQueue<>(MAX_OUTPUT_NUM,
                 (a, b) -> Double.compare(b.getValue(), a.getValue())
@@ -78,12 +79,14 @@ public class SearchServiceImpl implements SearchService {
                 ranking.add(scoreEntry);
             }
         }
-        //change to list
-        List<Integer> topPages = ranking.stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-        return topPages;
+        // Convert the PriorityQueue to LinkedHashMap
+        LinkedHashMap<Integer, Double> rankingMap = new LinkedHashMap<>();
+        while (!ranking.isEmpty()) {
+            Map.Entry<Integer, Double> entry = ranking.poll();
+            rankingMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return rankingMap;
     }
     private double calculateCosineSimilarity(List<String> queryKeywords, Map<String, Double> documentVector) {
         double queryMagnitude = Math.sqrt(queryKeywords.size());

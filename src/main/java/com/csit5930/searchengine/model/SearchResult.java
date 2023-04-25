@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class SearchResult {
+    private String score;
     private String title;
     private String url;
     private String lastModifiedDate;
@@ -68,5 +69,12 @@ public class SearchResult {
         this.childLinks = childLinks;
     }
 
+    public String getScore() {
+        return score;
+    }
+
+    public void setScore(String score) {
+        this.score = score;
+    }
 }
 
