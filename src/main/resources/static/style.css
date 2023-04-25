@@ -1,0 +1,174 @@
+/*****************************************************************************/
+/* Colours */
+/* Blue: #002f5e */
+/* Crimson: #a91639 */
+/* Purple: #662d91 */
+/*****************************************************************************/
+body {
+    color: #000;
+}
+
+a, a:visited {
+    color: #002f5e;
+}
+
+header, footer {
+    color: #fff;    
+}
+
+#site-title {
+    background-color: #002f5e;
+}
+
+footer {
+    background-color: #c9e5ff; 
+    color: #000;
+}
+
+
+/*****************************************************************************/
+/* Fonts */
+/*****************************************************************************/
+body {
+    /* Page 28 in the Identity Guidelines */
+    font-family: Palatino, "Book Antiqua", Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.25;
+}
+
+#site-title {
+    font-size: 2.0rem; 
+    text-align:center   
+}
+
+
+header a {
+    text-decoration: none;
+}
+
+header {
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.5);   
+}
+
+
+/*****************************************************************************/
+/*  General */
+/*****************************************************************************/
+html, body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+
+/*****************************************************************************/
+/*  Header */
+/*****************************************************************************/
+header {
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+#wordmark {
+    width: 200px;
+    padding: 8px 0 0 32px;    
+}
+
+#site-title {
+    padding: 32px 32px;
+    border-top: 1px dotted rgba(255, 255, 255, 0.2);
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.2);
+    height: 75%;
+}
+
+#search-bar {
+    position: absolute;
+    top: 50%;
+    left: 33%;
+}
+
+#search-input {
+    width: 500px;
+    height: 45px;
+    display: block;
+    border-radius: 42px;
+    padding-left: 15px;
+    background-color: #fff;
+    opacity: 0.9;
+    font-size: 0.8rem;
+}
+
+
+/*****************************************************************************/
+/*  Main */
+/*****************************************************************************/
+article, main {
+    margin: 32px 32px 64px 32px;
+}
+
+button[type="submit"] {
+  display: none
+}
+
+.search-result {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 1em;
+  color: #0066CC;
+  text-decoration: none;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.url {
+  font-size: 0.8em;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.info {
+  font-size: 0.6em;
+  color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.last-modified-date {
+  margin-right: 10px;
+  right: 0;
+}
+
+.last-modified-text {
+  margin-right: 5px;
+}
+
+.size::before {
+  content: "(";
+}
+
+.size::after {
+  content: ")";
+}
+
+hr {
+  margin: 10px 0;
+  border: none;
+  border-bottom: 1px solid #CCC;
+}
+
+
+/*****************************************************************************/
+/*  Footer */
+/*****************************************************************************/
+footer {
+    padding: 32px 32px 64px 32px;
+}
+
+#unit-signature {
+    width: 100%;
+}
+

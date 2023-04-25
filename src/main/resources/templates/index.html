@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Search Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CSIT5930 Search Engine</title>
+    <link th:href="@{/style.css}" rel="stylesheet">
+    <link th:href="@{/responsive.css}" rel="stylesheet">
+    <script th:src="@{/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{/header-slideshow.js}"></script>
 </head>
 <body>
-    <form th:action="@{/search}" method="get">
-        <label for="search-input">Search:</label>
-        <input type="text" id="search-input" name="query">
-        <button type="submit">Search</button>
-    </form>
-    <div th:if="${searchResults}">
-        <h2>Search Results</h2>
-        <ul>
-            <li th:each="result : ${searchResults}">
-                <td th:text="${result.title}"></td>
-                <td th:text="${result.url}"></td>
-                <td th:text="${result.lastModifiedDate}"></td>
-                <td th:text="${result.size}"></td>
-            </li>
-        </ul>
-    </div>
+    <header>
+        <img id="wordmark" th:src="@{/UST_L3_black.jpg}" alt="HKUST"/>
+        <div id="hero-container" class="bee">
+            <div class="overlay"></div>
+            <div id="site-title">
+                <a>Search Engine</a>
+                <form th:action="@{/search}" id="search-bar" method="get" onsubmit="event.preventDefault(); document.getElementById('search-button').click();">
+                    <input type="text" id="search-input" name="query" placeholder="Press enter to search..." onkeydown="if (event.keyCode === 13) { this.form.submit(); return false; }">
+                    <button id="search-button" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </header>
+    <main th:if="${searchResults}">
+        <div class="search-results">
+            <div th:each="result : ${searchResults}" class="search-result">
+                <a th:href="${result.url}" class="title" th:text="${result.title}"></a>
+                <p class="url" th:text="${result.url}"></p>
+                <div class="info">
+                    <span class="last-modified-text">Last modified:</span>
+                    <span class="last-modified-date" th:text="${result.lastModifiedDate}"></span>
+                    <span class="size" th:text="${result.size}"></span>
+                </div>
+                <hr>
+            </div>
+        </div>
+    </main>
+
+    <footer th:if="${searchResults}">
+        <img id="unit-signature"  src="/logo-group.png" alt="HKUST Department of Computer Science and Engineering"/>
+    </footer>
 </body>
 </html>
