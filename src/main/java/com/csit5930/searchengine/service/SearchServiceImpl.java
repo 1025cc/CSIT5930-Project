@@ -33,16 +33,17 @@ public class SearchServiceImpl implements SearchService {
 
         //Calculate score for ranking
         //page ids and corresponding scores of top 50 pages
-        LinkedHashMap<Integer,Double> top50Pages = getTopPages(queryTokens, documentVectors);
+        List<HashMap.SimpleEntry<Integer,Double>> top50Pages = getTopPages(queryTokens, documentVectors);
 
         List<SearchResult> results = processResults(top50Pages);
         return results;
     }
 
-    private List<SearchResult> processResults(LinkedHashMap<Integer,Double> topPages) {
+    private List<SearchResult> processResults(List<HashMap.SimpleEntry<Integer,Double>> topPages) {
         List<SearchResult> results = new ArrayList<>();
-        for(int pageId: topPages.keySet()){
+        for(HashMap.SimpleEntry<Integer,Double> pageEntry: topPages){
             SearchResult searchResult = new SearchResult();
+            int pageId = pageEntry.getKey();
             PageInfo pageInfo= indexer.getPageInfoById(pageId);
             searchResult.setTitle(pageInfo.getTitle());
             searchResult.setUrl(pageInfo.getUrl());
@@ -51,16 +52,16 @@ public class SearchServiceImpl implements SearchService {
             searchResult.setTop5Keywords(indexer.getTop5KeywordByPageId(pageId));
             searchResult.setChildLinks(indexer.getChildLinksByPageId(pageId));
             searchResult.setParentLinks(indexer.getParentLinksByPageId(pageId));
-            searchResult.setScore(String.format("%.4f", topPages.get(pageId)));
+            searchResult.setScore(String.format("%.4f", pageEntry.getValue()));
             results.add(searchResult);
         }
         return results;
     }
 
-    private LinkedHashMap<Integer,Double> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors) {
+    private List<HashMap.SimpleEntry<Integer,Double>> getTopPages(List<String> queryTokens, Map<Integer, Map<String, Double>> documentVectors) {
         //using priority queue to get top 50 pages
         PriorityQueue<HashMap.SimpleEntry<Integer, Double>> ranking = new PriorityQueue<>(MAX_OUTPUT_NUM,
-                (a, b) -> Double.compare(b.getValue(), a.getValue())
+                (a, b) -> Double.compare(a.getValue(), b.getValue())
         );
 
         for (Map.Entry<Integer, Map<String, Double>> entry : documentVectors.entrySet()) {
@@ -79,13 +80,12 @@ public class SearchServiceImpl implements SearchService {
                 ranking.add(scoreEntry);
             }
         }
-        // Convert the PriorityQueue to LinkedHashMap
-        LinkedHashMap<Integer, Double> rankingMap = new LinkedHashMap<>();
+        // Converting PriorityQueue to List in reverse order
+        List<HashMap.SimpleEntry<Integer, Double>> rankingMap = new ArrayList<>();
         while (!ranking.isEmpty()) {
-            Map.Entry<Integer, Double> entry = ranking.poll();
-            rankingMap.put(entry.getKey(), entry.getValue());
+            rankingMap.add(ranking.poll());
         }
-
+        rankingMap.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
         return rankingMap;
     }
     private double calculateCosineSimilarity(List<String> queryKeywords, Map<String, Double> documentVector) {
