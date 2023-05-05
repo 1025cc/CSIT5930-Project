@@ -26,11 +26,21 @@
         <div class="search-results">
             <div th:each="result : ${searchResults}" class="search-result">
                 <a th:href="${result.url}" class="title" th:text="${result.title}"></a>
-                <p class="url" th:text="${result.url}"></p>
+                <p class="url" th:href="${result.url}" th:text="${result.url}"></p>
+                <span class="url" th:each="entry : ${result.top5Keywords}">
+                    <span th:text="${entry.key + ': ' + entry.value}"></span>
+                </span>
+                <div class="url" th:each="parent : ${result.parentLinks}">
+                    <span>Parent Link: <span th:text="${parent}"></span></span>
+                </div>
+                <div class="url" th:each="child : ${result.childLinks}">
+                    <span>Child Link: <span th:text="${child}"></span></span>
+                </div>
                 <div class="info">
                     <span class="last-modified-text">Last modified:</span>
                     <span class="last-modified-date" th:text="${result.lastModifiedDate}"></span>
-                    <span class="size" th:text="${result.size}"></span>
+                    <span class="size">Size: <span th:text="${result.size}"></span></span>
+                    <span class="score" th:text="${'Score: ' + result.score}"></span>
                 </div>
                 <hr>
             </div>

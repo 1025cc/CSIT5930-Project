@@ -114,7 +114,7 @@ button[type="submit"] {
 }
 
 .url {
-  font-size: 0.8em;
+  font-size: 0.7em;
   color: #666;
   margin-bottom: 5px;
 }
@@ -136,11 +136,15 @@ button[type="submit"] {
 }
 
 .size::before {
-  content: "(";
+  content: "| ";
 }
 
 .size::after {
-  content: ")";
+  content: " | ";
+}
+
+.score::after {
+  content: " |";
 }
 
 hr {
