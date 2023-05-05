@@ -469,6 +469,9 @@ public class Indexer {
         return pageIds;
     }
 
+    /**
+     * debug helper function
+     */
     public void displayAllIndex(){
         rocksDBUtil.displayAllIndexes();
     }

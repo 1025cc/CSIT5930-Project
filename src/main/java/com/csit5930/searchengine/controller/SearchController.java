@@ -2,7 +2,6 @@ package com.csit5930.searchengine.controller;
 
 import com.csit5930.searchengine.service.SearchService;
 import com.csit5930.searchengine.model.SearchResult;
-import org.rocksdb.RocksDBException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -72,8 +72,12 @@ public class Posting implements Serializable {
     }
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Posting posting = (Posting) o;
         return pageID == posting.pageID;
     }
